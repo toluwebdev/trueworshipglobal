@@ -1,0 +1,106 @@
+import { API_BASE } from "./env";
+
+async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(options?.headers || {}),
+    },
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(
+      (data as { error?: string }).error || `Request failed (${res.status})`,
+    );
+  }
+  return data as T;
+}
+
+export type ApiBlog = {
+  _id: string;
+  imageUrl: string;
+  title: string;
+  genre: string;
+  content: string;
+  isPublished: boolean;
+  publishedAt: string | null;
+  createdAt: string;
+};
+
+export type ApiEvent = {
+  _id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  registerUrl: string;
+  date: string;
+  time: string;
+  location: string;
+};
+
+export const cmsApi = {
+  blogs: {
+    list: () => request<ApiBlog[]>("/api/blogs"),
+    get: (id: string) => request<ApiBlog>(`/api/blogs/${id}`),
+  },
+  events: {
+    list: () => request<ApiEvent[]>("/api/events"),
+    get: (id: string) => request<ApiEvent>(`/api/events/${id}`),
+  },
+  mailing: {
+    subscribe: (name: string, email: string) =>
+      request<{ ok: boolean; message?: string }>("/api/mailing", {
+        method: "POST",
+        body: JSON.stringify({ name, email }),
+      }),
+  },
+};
+
+export function formatBlogDate(publishedAt: string | null, createdAt?: string): string {
+  const raw = publishedAt || createdAt;
+  if (!raw) return "";
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+export function blogExcerpt(content: string, max = 160): string {
+  const plain = content.replace(/\s+/g, " ").trim();
+  if (plain.length <= max) return plain;
+  return `${plain.slice(0, max).trim()}…`;
+}
+
+export function contentParagraphs(content: string): string[] {
+  return content
+    .split(/\n\n+/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+}
+
+export function eventSubtitle(event: ApiEvent): string {
+  const d = new Date(event.date);
+  const dateLabel = Number.isNaN(d.getTime())
+    ? ""
+    : d.toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+  const parts = [dateLabel, event.time, event.location].filter(Boolean);
+  return parts.join(" · ");
+}
+
+export function isEventUpcoming(date: string): boolean {
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  d.setHours(0, 0, 0, 0);
+  return d >= today;
+}

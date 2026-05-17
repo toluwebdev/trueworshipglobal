@@ -1,15 +1,24 @@
 import { AnimatePresence } from "framer-motion";
 import { Route, Routes, useLocation } from "react-router-dom";
 import About from "./pages/About";
+import Books from "./pages/Books";
+import Events from "./pages/Events";
+import EventDetail from "./pages/EventDetail";
+import Gallery from "./pages/Gallery";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import Home from "./pages/Home";
 import Nav from "./components/Nav";
+import Footer from "./components/Footer";
+import ScrollToTop from "./components/ScrollToTop";
 import AnimatedPage from "./components/AnimatedPage";
 
 const App = () => {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-white text-neutral-900">
+    <div className="min-h-screen bg-background text-white">
+      <ScrollToTop />
       <Nav />
       <main>
         <AnimatePresence mode="wait">
@@ -30,9 +39,58 @@ const App = () => {
                 </AnimatedPage>
               }
             />
+            <Route
+              path="/books"
+              element={
+                <AnimatedPage>
+                  <Books />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/events"
+              element={
+                <AnimatedPage>
+                  <Events />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/events/:eventId"
+              element={
+                <AnimatedPage>
+                  <EventDetail />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/blog"
+              element={
+                <AnimatedPage>
+                  <Blog />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/blog/:postId"
+              element={
+                <AnimatedPage>
+                  <BlogPost />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/gallery"
+              element={
+                <AnimatedPage>
+                  <Gallery />
+                </AnimatedPage>
+              }
+            />
           </Routes>
         </AnimatePresence>
       </main>
+      <Footer />
     </div>
   );
 };

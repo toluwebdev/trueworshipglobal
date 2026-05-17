@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
+import { heroSlides } from "../assets/gallery";
 
 type SlideCta = {
   label: string;
@@ -7,39 +8,7 @@ type SlideCta = {
   external?: boolean;
 };
 
-type HeroSlide = {
-  id: number;
-  image: string;
-  alt: string;
-  ctas?: SlideCta[];
-  heading?: string;
-};
-
-const slides: HeroSlide[] = [
-  {
-    id: 1,
-    image: "https://picsum.photos/seed/pste-hero-1/1920/1080",
-    alt: "Hero slide 1",
-    ctas: [{ label: "Presave", href: "#" }],
-  },
-  {
-    id: 2,
-    image: "https://picsum.photos/seed/pste-hero-2/1920/1080",
-    alt: "Hero slide 2",
-    ctas: [{ label: "Become a Fan", href: "#footer" }],
-  },
-  {
-    id: 3,
-    image: "https://picsum.photos/seed/pste-hero-3/1920/1080",
-    alt: "Hero slide 3",
-    heading:
-      "LightOut is a social impact platform for teenage students across high schools in Nigeria",
-    ctas: [
-      { label: "Donate", href: "#" },
-      { label: "Get Tickets", href: "#" },
-    ],
-  },
-];
+const slides = heroSlides;
 
 const AUTOPLAY_MS = 5000;
 
@@ -60,16 +29,15 @@ const Hero = () => {
   const [paused, setPaused] = useState(false);
   const [direction, setDirection] = useState(1);
 
-  const goTo = useCallback(
-    (index: number) => {
-      setActive((current) => {
-        const next = (index + slides.length) % slides.length;
-        setDirection(next > current || (current === slides.length - 1 && next === 0) ? 1 : -1);
-        return next;
-      });
-    },
-    [],
-  );
+  const goTo = useCallback((index: number) => {
+    setActive((current) => {
+      const next = (index + slides.length) % slides.length;
+      setDirection(
+        next > current || (current === slides.length - 1 && next === 0) ? 1 : -1,
+      );
+      return next;
+    });
+  }, []);
 
   const next = useCallback(() => {
     setDirection(1);
@@ -135,18 +103,18 @@ const Hero = () => {
             className="flex flex-col items-center"
           >
             {slide.heading ? (
-              <div className="mx-auto flex max-w-3xl flex-col items-center gap-8">
+              <motion.div className="mx-auto flex max-w-3xl flex-col items-center gap-8">
                 <h1 className="font-primary text-2xl leading-snug tracking-wide md:text-4xl">
                   {slide.heading}
                 </h1>
                 {slide.ctas && (
-                  <div className="flex flex-wrap items-center justify-center gap-4">
+                  <motion.div className="flex flex-wrap items-center justify-center gap-4">
                     {slide.ctas.map((cta, i) => (
                       <HeroButton key={cta.label} {...cta} delay={i * 0.1} />
                     ))}
-                  </div>
+                  </motion.div>
                 )}
-              </div>
+              </motion.div>
             ) : (
               slide.ctas?.map((cta, i) => (
                 <HeroButton key={cta.label} {...cta} delay={i * 0.1} />

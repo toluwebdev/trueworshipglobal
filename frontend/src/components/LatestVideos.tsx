@@ -34,7 +34,7 @@ const LatestVideos = () => {
   }, []);
 
   return (
-    <section className="bg-[#1a1a1a] px-6 py-16 text-white md:py-24">
+    <section id="latest-videos" className="bg-background px-6 py-16 text-white md:py-24">
       <motion.h2
         className="mb-10 text-center font-primary text-sm tracking-[0.35em] uppercase md:mb-14 md:text-base"
         initial={{ opacity: 0, y: 16 }}

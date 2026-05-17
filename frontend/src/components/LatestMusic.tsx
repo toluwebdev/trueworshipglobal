@@ -58,7 +58,7 @@ const LatestMusic = () => {
   };
 
   return (
-    <section className="bg-white px-6 py-16 md:px-10 md:py-24">
+    <section id="latest-music" className="bg-background px-6 py-16 md:px-10 md:py-24">
       <motion.div
         className="mx-auto max-w-7xl"
         initial={{ opacity: 0, y: 24 }}
@@ -67,27 +67,27 @@ const LatestMusic = () => {
         transition={{ duration: 0.5 }}
       >
         <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
-          <h2 className="font-secondary text-4xl uppercase tracking-tight text-neutral-900 md:text-5xl">
+          <h2 className="font-secondary text-4xl uppercase tracking-tight text-white md:text-5xl">
             Latest Music
           </h2>
           <a
             href={SPOTIFY_ARTIST_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-primary text-sm uppercase tracking-widest text-neutral-500 transition hover:text-neutral-900"
+            className="font-primary text-sm uppercase tracking-widest text-neutral-400 transition hover:text-white"
           >
             View on Spotify →
           </a>
         </div>
 
         {error ? (
-          <motion.div className="rounded-lg border border-neutral-200 bg-neutral-50 px-6 py-10 text-center">
-            <p className="font-primary text-sm text-neutral-600">{error}</p>
+          <motion.div className="rounded-lg border border-neutral-700 bg-neutral-900 px-6 py-10 text-center">
+            <p className="font-primary text-sm text-neutral-400">{error}</p>
             <a
               href={SPOTIFY_ARTIST_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 inline-block font-primary text-sm uppercase tracking-widest text-neutral-900 underline"
+              className="mt-4 inline-block font-primary text-sm uppercase tracking-widest text-white underline"
             >
               Open on Spotify →
             </a>
@@ -97,7 +97,7 @@ const LatestMusic = () => {
           <button
             type="button"
             onClick={() => scroll("left")}
-            className="absolute top-1/2 left-0 z-10 hidden -translate-x-1/2 -translate-y-1/2 rounded-full border border-neutral-200 bg-white p-2 shadow-md transition hover:bg-neutral-50 md:flex"
+            className="absolute top-1/2 left-0 z-10 hidden -translate-x-1/2 -translate-y-1/2 rounded-full border border-neutral-600 bg-neutral-900 p-2 text-white shadow-md transition hover:bg-neutral-800 md:flex"
             aria-label="Scroll music left"
           >
             <Chevron direction="left" />
@@ -105,7 +105,7 @@ const LatestMusic = () => {
           <button
             type="button"
             onClick={() => scroll("right")}
-            className="absolute top-1/2 right-0 z-10 hidden translate-x-1/2 -translate-y-1/2 rounded-full border border-neutral-200 bg-white p-2 shadow-md transition hover:bg-neutral-50 md:flex"
+            className="absolute top-1/2 right-0 z-10 hidden translate-x-1/2 -translate-y-1/2 rounded-full border border-neutral-600 bg-neutral-900 p-2 text-white shadow-md transition hover:bg-neutral-800 md:flex"
             aria-label="Scroll music right"
           >
             <Chevron direction="right" />
@@ -121,8 +121,8 @@ const LatestMusic = () => {
                     key={i}
                     className="w-[min(85vw,280px)] shrink-0 snap-start animate-pulse md:w-[320px]"
                   >
-                    <div className="aspect-square rounded bg-neutral-200" />
-                    <div className="mt-3 h-4 w-2/3 rounded bg-neutral-200" />
+                    <div className="aspect-square rounded bg-neutral-800" />
+                    <div className="mt-3 h-4 w-2/3 rounded bg-neutral-800" />
                   </div>
                 ))
               : releases.map((release, i) => (
@@ -138,7 +138,7 @@ const LatestMusic = () => {
                     viewport={{ once: true, margin: "-40px" }}
                     className="group w-[min(85vw,280px)] shrink-0 snap-start md:w-[320px]"
                   >
-                    <div className="relative aspect-square overflow-hidden rounded bg-neutral-100">
+                    <div className="relative aspect-square overflow-hidden rounded bg-neutral-900">
                       {release.imageUrl ? (
                         <img
                           src={release.imageUrl}
@@ -147,7 +147,7 @@ const LatestMusic = () => {
                           loading="lazy"
                         />
                       ) : (
-                        <div className="flex h-full items-center justify-center bg-neutral-200 font-primary text-xs text-neutral-500">
+                        <div className="flex h-full items-center justify-center bg-neutral-800 font-primary text-xs text-neutral-500">
                           No art
                         </div>
                       )}
@@ -158,7 +158,7 @@ const LatestMusic = () => {
                         </span>
                       </div>
                     </div>
-                    <p className="mt-3 font-primary text-sm uppercase tracking-wide text-neutral-900">
+                    <p className="mt-3 font-primary text-sm uppercase tracking-wide text-white">
                       {release.title}
                     </p>
                   </motion.a>

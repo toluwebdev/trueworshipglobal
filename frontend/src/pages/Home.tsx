@@ -8,7 +8,6 @@ const Home = () => {
       <Hero />
       <LatestMusic />
       <LatestVideos />
-      <div id="footer" className="min-h-[40vh] px-6 py-16 md:px-10" />
     </>
   );
 };

@@ -32,18 +32,24 @@ const Nav = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const isHome = location.pathname === "/";
-  const onHero = isHome && !scrolled;
-  const isLight = !onHero;
+  const solidNav = scrolled;
 
   const isActive = (path: string) => location.pathname === path;
+
+  const scrollToTop = () => window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+
+  const onNavClick = (path: string) => {
+    if (location.pathname === path) {
+      scrollToTop();
+    }
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [location.pathname]);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -54,27 +60,27 @@ const Nav = () => {
       className="fixed inset-x-0 top-0 z-50"
       initial={false}
       animate={{
-        backgroundColor: isLight ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0)",
-        borderBottomColor: isLight ? "rgb(229,229,229)" : "rgba(229,229,229,0)",
+        backgroundColor: solidNav ? "transparent" : "rgba(26,26,26,0)",
+        borderBottomColor: solidNav ? "transparent " : "rgba(51,51,51,0)",
       }}
       transition={{ duration: 0.3 }}
       style={{
         borderBottomWidth: 1,
         borderBottomStyle: "solid",
-        backdropFilter: isLight ? "blur(12px)" : "none",
+        backdropFilter: solidNav ? "blur(12px)" : "none",
       }}
     >
       <motion.div
-        className={`mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:grid md:grid-cols-[1fr_auto_1fr] md:px-10 ${
-          isLight ? "text-neutral-900" : "text-white"
+        className={`mx-auto flex max-w-7xl items-center gap-2 justify-between px-6 py-4 md:grid md:grid-cols-[1fr_auto_1fr] md:px-10 ${
+          "text-white"
         }`}
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
       >
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Link to="/" className="block shrink-0 justify-self-start">
-            <img src={data.logo} className="h-10 w-auto md:h-12" alt="Logo" />
+          <Link to="/" className="block shrink-0 justify-self-start" onClick={() => onNavClick("/")}>
+            <img src={data.logo} className="h-20 w-auto md:h-7" alt="Logo" />
           </Link>
         </motion.div>
 
@@ -83,7 +89,7 @@ const Nav = () => {
           aria-label="Main navigation"
         >
           <motion.ul
-            className="flex items-center gap-8 font-primary text-sm tracking-wide"
+            className="flex items-center gap-10 font-primary text-sm tracking-wide"
             initial="hidden"
             animate="visible"
             variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
@@ -93,13 +99,14 @@ const Nav = () => {
                 <Link
                   to={path}
                   className="relative block py-1"
+                  onClick={() => onNavClick(path)}
                 >
                   {label}
                   {isActive(path) && (
                     <motion.span
                       layoutId="nav-underline"
                       className={`absolute inset-x-0 -bottom-0.5 h-px ${
-                        isLight ? "bg-neutral-900" : "bg-white"
+                        "bg-white"
                       }`}
                       transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
@@ -111,7 +118,7 @@ const Nav = () => {
         </nav>
 
         <motion.div
-          className="hidden items-center justify-end gap-4 justify-self-end md:flex"
+          className="hidden items-center justify-end gap-7 justify-self-end md:flex"
           initial="hidden"
           animate="visible"
           variants={{ visible: { transition: { staggerChildren: 0.04, delayChildren: 0.2 } } }}
@@ -181,7 +188,7 @@ const Nav = () => {
       <AnimatePresence>
         {menuOpen && (
           <motion.nav
-            className="overflow-hidden border-t border-neutral-200 bg-white px-6 text-neutral-900 md:hidden"
+            className="overflow-hidden border-t border-neutral-700 bg-background px-6 text-white md:hidden"
             aria-label="Mobile navigation"
             variants={mobileMenuVariants}
             initial="hidden"
@@ -199,6 +206,7 @@ const Nav = () => {
                   <Link
                     to={path}
                     className={isActive(path) ? "underline underline-offset-4" : ""}
+                    onClick={() => onNavClick(path)}
                   >
                     {label}
                   </Link>

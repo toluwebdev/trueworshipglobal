@@ -3,6 +3,8 @@ import logo from "./logo.png";
 export const navLinks = [
   { label: "Home", path: "/" },
   { label: "About", path: "/about" },
+  { label: "Books", path: "/books" },
+  { label: "Events", path: "/events" },
   { label: "Blog", path: "/blog" },
   { label: "Gallery", path: "/gallery" },
 ] as const;
