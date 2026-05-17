@@ -74,7 +74,7 @@ function apiPlugin(): Plugin {
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const apiTarget = env.VITE_API_URL || "http://localhost:5000";
+  const apiTarget = env.VITE_API_URL || "https://trueworshipglobal-server.vercel.app";
 
   return {
     plugins: [react(), tailwindcss(), apiPlugin()],

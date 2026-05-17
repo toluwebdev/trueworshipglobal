@@ -23,11 +23,28 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 const localhostOrigin = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+const extraOrigins = (process.env.CORS_ORIGINS || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  if (localhostOrigin.test(origin)) return true;
+  if (extraOrigins.includes(origin)) return true;
+  try {
+    const { hostname } = new URL(origin);
+    if (hostname.endsWith(".vercel.app")) return true;
+  } catch {
+    // ignore invalid origin
+  }
+  return false;
+}
 
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || localhostOrigin.test(origin)) {
+      if (isAllowedOrigin(origin)) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));

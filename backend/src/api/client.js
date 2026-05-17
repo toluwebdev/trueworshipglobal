@@ -1,4 +1,5 @@
-const API_BASE = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
+const DEFAULT_API = "https://trueworshipglobal-server.vercel.app";
+const API_BASE = (import.meta.env.VITE_API_URL || DEFAULT_API).replace(/\/$/, "");
 
 function getToken() {
   return sessionStorage.getItem("twg_admin_token");
@@ -28,7 +29,7 @@ async function request(path, options = {}) {
     });
   } catch {
     throw new Error(
-      "Cannot reach the API. In a separate terminal run: cd server && npm run dev — wait for “API running on http://localhost:5000”, then try again.",
+      "Cannot reach the API. Check that https://trueworshipglobal-server.vercel.app is running and VITE_API_URL in backend/.env is set correctly.",
     );
   }
 
