@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import {
-  fetchLatestReleasesWithFallback,
+  fetchLatestReleases,
   SPOTIFY_ARTIST_URL,
   type SpotifyRelease,
 } from "../lib/spotify";
@@ -20,14 +20,26 @@ const cardVariants = {
 const LatestMusic = () => {
   const [releases, setReleases] = useState<SpotifyRelease[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    fetchLatestReleasesWithFallback(RELEASE_LIMIT)
-      .then(({ releases: data }) => {
-        if (!cancelled) setReleases(data);
+    fetchLatestReleases(RELEASE_LIMIT)
+      .then((data) => {
+        if (!cancelled) {
+          setReleases(data);
+          setError(null);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setReleases([]);
+          setError(
+            err instanceof Error ? err.message : "Failed to load Spotify releases",
+          );
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -68,7 +80,20 @@ const LatestMusic = () => {
           </a>
         </div>
 
-        <div className="relative">
+        {error ? (
+          <motion.div className="rounded-lg border border-neutral-200 bg-neutral-50 px-6 py-10 text-center">
+            <p className="font-primary text-sm text-neutral-600">{error}</p>
+            <a
+              href={SPOTIFY_ARTIST_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-block font-primary text-sm uppercase tracking-widest text-neutral-900 underline"
+            >
+              Open on Spotify →
+            </a>
+          </motion.div>
+        ) : (
+        <motion.div className="relative">
           <button
             type="button"
             onClick={() => scroll("left")}
@@ -139,7 +164,8 @@ const LatestMusic = () => {
                   </motion.a>
                 ))}
           </div>
-        </div>
+        </motion.div>
+        )}
       </motion.div>
     </section>
   );

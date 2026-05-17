@@ -94,7 +94,7 @@ const Hero = () => {
 
   return (
     <section
-      className="relative h-screen w-full overflow-hidden"
+      className="relative h-[85vh] w-full overflow-hidden"
       aria-roledescription="carousel"
       aria-label="Hero"
       onMouseEnter={() => setPaused(true)}

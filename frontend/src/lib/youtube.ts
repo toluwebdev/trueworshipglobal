@@ -1,6 +1,5 @@
 import {
   curatedVideos,
-  manualVideos,
   YOUTUBE_CHANNEL_URL,
   type VideoItem,
 } from "../assets/videos";
@@ -8,32 +7,34 @@ import {
 export { YOUTUBE_CHANNEL_URL, curatedVideos };
 export type { VideoItem };
 
-export async function fetchVideoList(limit = 12): Promise<VideoItem[]> {
-  try {
-    const res = await fetch(`/api/youtube/videos?limit=${limit}`);
-    if (!res.ok) throw new Error("YouTube API error");
-    const data = (await res.json()) as VideoItem[];
-    if (getPlayableVideos(data).length > 0) return data;
-    throw new Error("No playable videos");
-  } catch {
-    return curatedVideos.slice(0, limit);
-  }
-}
+export type VideoListResponse = {
+  videos: VideoItem[];
+  source: "youtube" | "curated";
+};
 
 export async function fetchVideoListWithFallback(
   limit = 12,
-): Promise<{ videos: VideoItem[]; source: "youtube" | "curated" }> {
+): Promise<VideoListResponse> {
   try {
-    const res = await fetch(`/api/youtube/videos?limit=${limit}`);
+    const res = await fetch(`/api/youtube/videos?limit=${limit}`, {
+      cache: "no-store",
+    });
     if (!res.ok) throw new Error("YouTube API error");
+
     const videos = (await res.json()) as VideoItem[];
-    if (getPlayableVideos(videos).length > 0) {
-      return { videos, source: "youtube" };
+    const playable = videos.filter((v) => v.youtubeVideoId);
+
+    if (playable.length > 0) {
+      return { videos: playable, source: "youtube" };
     }
   } catch {
-    /* curated */
+    /* fallback below */
   }
-  return { videos: manualVideos.slice(0, limit), source: "curated" };
+
+  return {
+    videos: curatedVideos.slice(0, limit),
+    source: "curated",
+  };
 }
 
 export function getPlayableVideos(videos: VideoItem[]) {

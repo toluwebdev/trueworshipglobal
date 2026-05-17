@@ -37,6 +37,7 @@ function apiPlugin(): Plugin {
         try {
           const releases = await getLatestReleases(env, limit);
           res.setHeader("Content-Type", "application/json");
+          res.setHeader("Cache-Control", "public, max-age=1800, stale-while-revalidate=3600");
           res.end(JSON.stringify(releases));
         } catch (err) {
           res.statusCode = 500;
