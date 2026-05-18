@@ -1,9 +1,9 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig, loadEnv, type Plugin } from "vite";
-import { getLatestReleases } from "./server/spotify";
-import { getStoreProducts } from "./server/selar";
-import { getChannelVideos } from "./server/youtube";
+import { getLatestReleases } from "./api/_lib/spotify";
+import { getStoreProducts } from "./api/_lib/selar";
+import { getChannelVideos } from "./api/_lib/youtube";
 
 function apiPlugin(): Plugin {
   return {

@@ -1,4 +1,4 @@
-import { getLatestReleases } from "../../server/spotify";
+import { getLatestReleases } from "../_lib/spotify.js";
 
 export default async function handler(
   req: { method?: string; query?: { limit?: string } },

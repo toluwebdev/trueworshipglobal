@@ -1,4 +1,4 @@
-import { getChannelVideos } from "../../server/youtube";
+import { getChannelVideos } from "../_lib/youtube.js";
 
 export default async function handler(
   req: { method?: string; query?: { limit?: string } },

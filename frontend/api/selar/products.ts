@@ -1,4 +1,4 @@
-import { getStoreProducts } from "../../server/selar";
+import { getStoreProducts } from "../_lib/selar.js";
 
 export default async function handler(
   req: { method?: string },
