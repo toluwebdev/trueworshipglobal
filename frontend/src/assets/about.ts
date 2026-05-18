@@ -1,3 +1,31 @@
+export const ministryParagraphs = [
+  "True Worship Global is a global ministry platform designed to awaken, equip, and raise the next generation of true worshippers. We believe that every believer has a distinct, God-given assignment, and we are more than a ministry — we are a global community committed to helping you find your voice (identity), refine your gifts, and deepen your intimacy with the Father.",
+  "Through intensive, spirit-led training, online mentorship, and focused schools of ministry (like our Worship School), we break down geographical barriers to deliver impactful teaching straight to your screen. Whether you are a worship leader, a creative, or a believer hungry for deeper spiritual growth, we are here to help you move past traditional boundaries, anchor your life in biblical truth, and worship God with absolute sincerity.",
+] as const;
+
+export const ministryScripture = {
+  text: "But the hour is coming, and is now here, when the true worshippers will worship the Father in spirit and truth, for the Father is seeking such people to worship him.",
+  reference: "John 4:23",
+} as const;
+
+export const corePillars = [
+  {
+    title: "Biblical Truth",
+    description:
+      "Everything we teach, build, and record is rooted firmly in the uncompromised, living Word of God.",
+  },
+  {
+    title: "Authentic Identity",
+    description:
+      "We help you strip away the noise so you can hear God clearly and project your true spiritual gift and sound.",
+  },
+  {
+    title: "Global Community",
+    description:
+      "Connecting worshippers, leaders, and creatives worldwide for collaborative, kingdom-driven impact.",
+  },
+] as const;
+
 export const bioParagraphs = [
   "Wole Emmanuel is a passionate and anointed praise and worship leader, author, pastor, and entrepreneur committed to helping people encounter God's presence. As founder of True Worship Global, he uses music to ignite revival and transform lives.",
   "Born in the mid-80s, he began singing in his church choir in 2003 and has since built a ministry that reaches the world with the message of Jesus — through worship concerts, conferences, and gatherings designed for young people to experience God's presence.",
