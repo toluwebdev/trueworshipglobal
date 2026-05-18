@@ -55,7 +55,7 @@ const LatestVideos = () => {
               {Array.from({ length: 12 }).map((_, i) => (
                 <motion.div
                   key={i}
-                  className="h-14 animate-pulse border border-neutral-700 bg-neutral-800"
+                  className="h-14 animate-pulse border border-gold/30 bg-neutral-800"
                 />
               ))}
             </motion.div>
@@ -94,8 +94,8 @@ const LatestVideos = () => {
                     title={video.title}
                     className={`min-h-[3.25rem] border px-2 py-3 font-primary text-[10px] leading-snug tracking-[0.15em] uppercase transition sm:min-h-[3.5rem] sm:px-3 sm:py-4 sm:text-[11px] md:text-xs ${
                       isActive
-                        ? "border-white bg-white text-black"
-                        : "border-white bg-transparent text-white hover:bg-white/10"
+                        ? "border-gold bg-gold text-black"
+                        : "border-gold/70 bg-transparent text-gold hover:border-gold hover:bg-gold/15"
                     }`}
                   >
                     <span className="line-clamp-2">{video.title}</span>
@@ -113,7 +113,7 @@ const LatestVideos = () => {
               href={YOUTUBE_CHANNEL_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-6 inline-block font-primary text-xs tracking-[0.25em] text-white uppercase underline"
+              className="mt-6 inline-block font-primary text-xs tracking-[0.25em] text-gold uppercase underline hover:text-gold-dark"
             >
               Watch on YouTube →
             </a>

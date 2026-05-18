@@ -19,6 +19,8 @@
   --color-foreground: #ffffff;
   --color-surface: #1a1a1a;
   --color-border: #333333;
+  --color-gold: #d4af37;
+  --color-gold-dark: #b8962e;
 }
 
 body {
