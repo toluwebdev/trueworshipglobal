@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import CardSkeleton from "../components/CardSkeleton";
 import {
   blogExcerpt,
   cmsApi,
@@ -56,7 +57,11 @@ const Blog = () => {
         </h1>
 
         {loading && (
-          <p className="text-center font-lato text-sm text-white/50">Loading posts…</p>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <CardSkeleton key={i} lines={2} />
+            ))}
+          </div>
         )}
 
         {error && (

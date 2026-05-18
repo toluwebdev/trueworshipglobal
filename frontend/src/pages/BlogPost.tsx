@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
+import ArticleSkeleton from "../components/ArticleSkeleton";
 import BlogEngagement from "../components/blog/BlogEngagement";
 import {
   cmsApi,
@@ -40,11 +41,7 @@ const BlogPost = () => {
   }
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background pt-28 text-white/50">
-        <p className="font-lato text-sm">Loading…</p>
-      </div>
-    );
+    return <ArticleSkeleton paragraphs={4} />;
   }
 
   if (notFound || !post) {

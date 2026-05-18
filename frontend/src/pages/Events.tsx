@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import CardSkeleton from "../components/CardSkeleton";
 import { cmsApi, eventSubtitle, isEventUpcoming, type ApiEvent } from "../lib/api";
 
 const cardVariants = {
@@ -61,7 +62,14 @@ const Events = () => {
         </h1>
 
         {loading && (
-          <p className="text-center font-lato text-sm text-white/50">Loading events…</p>
+          <section aria-label="Loading events">
+            <div className="mb-8 h-3 w-24 skeleton rounded-sm md:mb-10" />
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <CardSkeleton key={i} lines={1} />
+              ))}
+            </div>
+          </section>
         )}
 
         {error && (

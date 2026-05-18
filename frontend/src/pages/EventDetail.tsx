@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
+import ArticleSkeleton from "../components/ArticleSkeleton";
 import { cmsApi, eventSubtitle, isEventUpcoming, type ApiEvent } from "../lib/api";
 
 const EventDetail = () => {
@@ -34,11 +35,7 @@ const EventDetail = () => {
   }
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background pt-28 text-white/50">
-        <p className="font-lato text-sm">Loading…</p>
-      </div>
-    );
+    return <ArticleSkeleton paragraphs={3} reserveCta />;
   }
 
   if (notFound || !event) {
