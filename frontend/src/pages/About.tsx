@@ -26,7 +26,7 @@ const About = () => {
           backgroundAttachment: "fixed",
         }}
       />
-      <article className="mx-auto max-w-3xl pt-10">
+      <article className="mx-auto max-w-3xl pt-10 px-3">
         {bioParagraphs.map((paragraph, i) => (
           <motion.p
             key={i}

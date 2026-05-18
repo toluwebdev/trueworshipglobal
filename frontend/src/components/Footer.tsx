@@ -125,12 +125,7 @@ const Footer = () => {
         </section>
 
         <div className="mt-16 pt-16 md:mt-20">
-          <a
-            href={`tel:${contact.phone.replace(/\s/g, "")}`}
-            className="font-secondary text-2xl tracking-wide text-white transition hover:text-white/75 md:text-3xl"
-          >
-            {contact.phone}
-          </a>
+          
           <p className="mt-6 font-secondary text-xl tracking-[0.15em] text-white md:text-2xl">
             {contact.organization}
           </p>
