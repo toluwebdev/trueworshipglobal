@@ -86,7 +86,9 @@ export default defineConfig(({ mode }) => {
       proxy: {
         "/api/blogs": { target: apiTarget, changeOrigin: true },
         "/api/events": { target: apiTarget, changeOrigin: true },
+        "/api/worship-school": { target: apiTarget, changeOrigin: true },
         "/api/mailing": { target: apiTarget, changeOrigin: true },
+        "/api/donations": { target: apiTarget, changeOrigin: true },
       },
     },
   };

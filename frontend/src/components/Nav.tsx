@@ -80,7 +80,7 @@ const Nav = () => {
       >
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
           <Link to="/" className="block shrink-0 justify-self-start" onClick={() => onNavClick("/")}>
-            <img src={data.logo} className="h-20 w-auto md:h-7" alt="Logo" />
+            <img src={data.logo} className="h-10 w-auto md:h-10" alt="Logo" />
           </Link>
         </motion.div>
 

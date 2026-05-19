@@ -40,6 +40,8 @@ export type ApiEvent = {
   location: string;
 };
 
+export type ApiWorshipClass = ApiEvent;
+
 export const cmsApi = {
   blogs: {
     list: () => request<ApiBlog[]>("/api/blogs"),
@@ -48,6 +50,10 @@ export const cmsApi = {
   events: {
     list: () => request<ApiEvent[]>("/api/events"),
     get: (id: string) => request<ApiEvent>(`/api/events/${id}`),
+  },
+  worshipSchool: {
+    list: () => request<ApiWorshipClass[]>("/api/worship-school"),
+    get: (id: string) => request<ApiWorshipClass>(`/api/worship-school/${id}`),
   },
   mailing: {
     subscribe: (name: string, email: string) =>
@@ -81,6 +87,14 @@ export function contentParagraphs(content: string): string[] {
     .split(/\n\n+/)
     .map((p) => p.trim())
     .filter(Boolean);
+}
+
+export function classSubtitle(item: ApiWorshipClass): string {
+  return eventSubtitle(item);
+}
+
+export function isClassUpcoming(date: string): boolean {
+  return isEventUpcoming(date);
 }
 
 export function eventSubtitle(event: ApiEvent): string {

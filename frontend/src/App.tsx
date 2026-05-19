@@ -8,6 +8,9 @@ import Gallery from "./pages/Gallery";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import Home from "./pages/Home";
+import Donate from "./pages/Donate";
+import WorshipSchool from "./pages/WorshipSchool";
+import WorshipSchoolDetail from "./pages/WorshipSchoolDetail";
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
@@ -72,6 +75,22 @@ const App = () => {
               }
             />
             <Route
+              path="/worship-school"
+              element={
+                <AnimatedPage>
+                  <WorshipSchool />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/worship-school/:classId"
+              element={
+                <AnimatedPage>
+                  <WorshipSchoolDetail />
+                </AnimatedPage>
+              }
+            />
+            <Route
               path="/blog"
               element={
                 <AnimatedPage>
@@ -92,6 +111,14 @@ const App = () => {
               element={
                 <AnimatedPage>
                   <Gallery />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/donate"
+              element={
+                <AnimatedPage>
+                  <Donate />
                 </AnimatedPage>
               }
             />
