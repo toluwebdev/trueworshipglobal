@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import type { CSSProperties, ReactNode } from "react";
 import aboutImage from "../assets/45.jpg";
-import ministryImage from "../assets/38.jpg";
+import ministryImage from "../assets/about image.jpg";
 import {
   bioParagraphs,
   corePillars,
