@@ -1,37 +1,113 @@
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   fetchVideoListWithFallback,
+  findVideoBySlug,
   getEmbedUrl,
   getPlayableVideos,
+  getVideoSharePath,
+  getVideoSlug,
   YOUTUBE_CHANNEL_URL,
   type VideoItem,
 } from "../lib/youtube";
 
 const VIDEO_LIMIT = 15; // must match DEFAULT_VIDEO_LIMIT in api/_lib/youtube.ts
 
+function scrollToVideosSection() {
+  requestAnimationFrame(() => {
+    document.getElementById("latest-videos")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  });
+}
+
 const LatestVideos = () => {
+  const { videoSlug: routeSlug } = useParams<{ videoSlug?: string }>();
+  const [searchParams] = useSearchParams();
+  const querySlug = searchParams.get("video");
+  const videoSlug = routeSlug ?? querySlug ?? undefined;
+  const navigate = useNavigate();
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const hasScrolledToSection = useRef(false);
 
   const playable = getPlayableVideos(videos);
 
+  const selectVideo = useCallback(
+    (video: VideoItem, options?: { replace?: boolean; scroll?: boolean }) => {
+      const id = video.youtubeVideoId;
+      if (!id) return;
+
+      setActiveId(id);
+      navigate(getVideoSharePath(video), {
+        replace: options?.replace ?? false,
+      });
+
+      if (options?.scroll) {
+        scrollToVideosSection();
+      }
+    },
+    [navigate],
+  );
+
+  useEffect(() => {
+    if (!routeSlug && querySlug) {
+      navigate(`/video/${querySlug}`, { replace: true });
+    }
+  }, [routeSlug, querySlug, navigate]);
+
   useEffect(() => {
     let cancelled = false;
+    setLoading(true);
+    hasScrolledToSection.current = false;
+
     fetchVideoListWithFallback(VIDEO_LIMIT)
       .then(({ videos: data }) => {
         if (cancelled) return;
+        const list = getPlayableVideos(data);
         setVideos(data);
-        setActiveId(getPlayableVideos(data)[0]?.youtubeVideoId ?? null);
+
+        if (list.length === 0) {
+          setActiveId(null);
+          return;
+        }
+
+        const fromUrl = videoSlug ? findVideoBySlug(list, videoSlug) : undefined;
+        const initial = fromUrl ?? list[0];
+        setActiveId(initial.youtubeVideoId ?? null);
+
+        if (fromUrl) {
+          const expectedPath = getVideoSharePath(fromUrl);
+          if (window.location.pathname !== expectedPath) {
+            navigate(expectedPath, { replace: true });
+          }
+        } else if (videoSlug) {
+          navigate(getVideoSharePath(list[0]), { replace: true });
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
+
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [videoSlug, navigate]);
+
+  useEffect(() => {
+    if (loading || !videoSlug || playable.length === 0 || hasScrolledToSection.current) {
+      return;
+    }
+
+    const match = findVideoBySlug(playable, videoSlug);
+    if (!match?.youtubeVideoId) return;
+
+    hasScrolledToSection.current = true;
+    scrollToVideosSection();
+  }, [loading, videoSlug, playable]);
 
   return (
     <section id="latest-videos" className="bg-background px-6 py-16 text-white md:py-24">
@@ -45,13 +121,16 @@ const LatestVideos = () => {
         Latest Videos
       </motion.h2>
 
-      <div className="mx-auto max-w-5xl">
+      <motion.div
+        className="mx-auto max-w-5xl"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.1 }}
+      >
         {loading ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <div className="aspect-video w-full animate-pulse bg-neutral-800" />
-            <motion.div
-              className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 md:mt-8 md:gap-4"
-            >
+            <motion.div className="aspect-video w-full animate-pulse bg-neutral-800" />
+            <motion.div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 md:mt-8 md:gap-4">
               {Array.from({ length: 15 }).map((_, i) => (
                 <motion.div
                   key={i}
@@ -86,12 +165,14 @@ const LatestVideos = () => {
               {playable.map((video) => {
                 const id = video.youtubeVideoId!;
                 const isActive = id === activeId;
+                const slug = getVideoSlug(video);
                 return (
                   <button
-                    key={video.id}
+                    key={slug}
                     type="button"
-                    onClick={() => setActiveId(id)}
+                    onClick={() => selectVideo(video, { scroll: false })}
                     title={video.title}
+                    aria-current={isActive ? "true" : undefined}
                     className={`min-h-[3.25rem] border px-2 py-3 font-primary text-[10px] leading-snug tracking-[0.15em] uppercase transition sm:min-h-[3.5rem] sm:px-3 sm:py-4 sm:text-[11px] md:text-xs ${
                       isActive
                         ? "border-gold bg-gold text-black"
@@ -119,7 +200,7 @@ const LatestVideos = () => {
             </a>
           </div>
         )}
-      </div>
+      </motion.div>
     </section>
   );
 };

@@ -32,6 +32,14 @@ const App = () => {
               }
             />
             <Route
+              path="/video/:videoSlug"
+              element={
+                <AnimatedPage>
+                  <Home />
+                </AnimatedPage>
+              }
+            />
+            <Route
               path="/about"
               element={
                 <AnimatedPage>
