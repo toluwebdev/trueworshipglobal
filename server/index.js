@@ -15,6 +15,9 @@ import uploadAdminRoutes from "./routes/admin/upload.routes.js";
 import publicBlogRoutes from "./routes/public/blog.routes.js";
 import publicEventRoutes from "./routes/public/event.routes.js";
 import publicMailingRoutes from "./routes/public/mailing.routes.js";
+import publicDonationRoutes from "./routes/public/donation.routes.js";
+import publicWorshipSchoolRoutes from "./routes/public/worshipSchool.routes.js";
+import worshipSchoolAdminRoutes from "./routes/admin/worshipSchool.routes.js";
 
 // Helps Atlas SRV lookups on networks with flaky default DNS (Windows).
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
@@ -37,6 +40,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/blogs", publicBlogRoutes);
 app.use("/api/events", publicEventRoutes);
 app.use("/api/mailing", publicMailingRoutes);
+app.use("/api/donations", publicDonationRoutes);
+app.use("/api/worship-school", publicWorshipSchoolRoutes);
 
 app.use("/api/admin/blogs", requireAdmin, blogAdminRoutes);
 app.use("/api/admin/events", requireAdmin, eventAdminRoutes);
@@ -44,6 +49,7 @@ app.use("/api/admin/comments", requireAdmin, commentAdminRoutes);
 app.use("/api/admin/mailing", requireAdmin, mailingAdminRoutes);
 app.use("/api/admin/stats", requireAdmin, statsAdminRoutes);
 app.use("/api/admin/upload", requireAdmin, uploadAdminRoutes);
+app.use("/api/admin/worship-school", requireAdmin, worshipSchoolAdminRoutes);
 
 connectDB()
   .then(() => {

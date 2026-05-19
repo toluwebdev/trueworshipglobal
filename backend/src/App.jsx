@@ -8,6 +8,8 @@ import Blogs from "./pages/Blogs";
 import BlogForm from "./pages/BlogForm";
 import Events from "./pages/Events";
 import EventForm from "./pages/EventForm";
+import WorshipSchool from "./pages/WorshipSchool";
+import WorshipSchoolForm from "./pages/WorshipSchoolForm";
 import Comments from "./pages/Comments";
 import Mailing from "./pages/Mailing";
 
@@ -31,6 +33,9 @@ export default function App() {
             <Route path="events" element={<Events />} />
             <Route path="events/new" element={<EventForm />} />
             <Route path="events/:id/edit" element={<EventForm />} />
+            <Route path="worship-school" element={<WorshipSchool />} />
+            <Route path="worship-school/new" element={<WorshipSchoolForm />} />
+            <Route path="worship-school/:id/edit" element={<WorshipSchoolForm />} />
             <Route path="comments" element={<Comments />} />
             <Route path="mailing" element={<Mailing />} />
           </Route>

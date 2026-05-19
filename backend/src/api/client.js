@@ -73,6 +73,19 @@ export const api = {
     remove: (id) => request(`/api/admin/events/${id}`, { method: "DELETE" }),
   },
 
+  worshipSchool: {
+    list: () => request("/api/admin/worship-school"),
+    get: (id) => request(`/api/admin/worship-school/${id}`),
+    create: (body) =>
+      request("/api/admin/worship-school", { method: "POST", body: JSON.stringify(body) }),
+    update: (id, body) =>
+      request(`/api/admin/worship-school/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(body),
+      }),
+    remove: (id) => request(`/api/admin/worship-school/${id}`, { method: "DELETE" }),
+  },
+
   comments: {
     list: () => request("/api/admin/comments"),
     remove: (id) => request(`/api/admin/comments/${id}`, { method: "DELETE" }),

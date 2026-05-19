@@ -16,6 +16,11 @@ export default function Dashboard() {
   const items = [
     { label: "Blog posts", value: stats?.blogs, to: "/blogs" },
     { label: "Events", value: stats?.events, to: "/events" },
+    {
+      label: "Worship School",
+      value: stats?.worshipSchoolClasses,
+      to: "/worship-school",
+    },
     { label: "Comments", value: stats?.comments, to: "/comments" },
     { label: "Mailing list", value: stats?.subscribers, to: "/mailing" },
     { label: "Likes", value: stats?.likes },

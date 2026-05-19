@@ -11,6 +11,7 @@ const router = Router();
 const FOLDERS = {
   blogs: "trueworshipglobal/blogs",
   events: "trueworshipglobal/events",
+  "worship-school": "trueworshipglobal/worship-school",
 };
 
 const upload = multer({
@@ -48,7 +49,12 @@ router.post("/", upload.single("image"), async (req, res) => {
       return res.status(400).json({ error: "No image file provided" });
     }
 
-    const type = req.body.type === "events" ? "events" : "blogs";
+    const type =
+      req.body.type === "events"
+        ? "events"
+        : req.body.type === "worship-school"
+          ? "worship-school"
+          : "blogs";
     const folder = FOLDERS[type];
 
     const result = await uploadBuffer(req.file.buffer, folder);
