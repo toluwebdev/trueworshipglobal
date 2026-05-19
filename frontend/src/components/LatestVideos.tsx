@@ -8,7 +8,7 @@ import {
   type VideoItem,
 } from "../lib/youtube";
 
-const VIDEO_LIMIT = 12;
+const VIDEO_LIMIT = 15;
 
 const LatestVideos = () => {
   const [videos, setVideos] = useState<VideoItem[]>([]);
@@ -52,7 +52,7 @@ const LatestVideos = () => {
             <motion.div
               className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 md:mt-8 md:gap-4"
             >
-              {Array.from({ length: 12 }).map((_, i) => (
+              {Array.from({ length: 15 }).map((_, i) => (
                 <motion.div
                   key={i}
                   className="h-14 animate-pulse border border-gold/30 bg-neutral-800"

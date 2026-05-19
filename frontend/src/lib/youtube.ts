@@ -13,7 +13,7 @@ export type VideoListResponse = {
 };
 
 export async function fetchVideoListWithFallback(
-  limit = 12,
+  limit = 15,
 ): Promise<VideoListResponse> {
   try {
     const res = await fetch(`/api/youtube/videos?limit=${limit}`, {

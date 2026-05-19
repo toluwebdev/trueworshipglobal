@@ -110,7 +110,7 @@ async function fetchFromVideosTab(limit: number): Promise<VideoItem[]> {
 
 export async function getChannelVideos(
   _env: YoutubeEnv,
-  limit = 12,
+  limit = 15,
 ): Promise<VideoItem[]> {
   const now = Date.now();
   if (videoCache && now - videoCache.at < CACHE_MS) {

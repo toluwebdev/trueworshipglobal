@@ -20,7 +20,7 @@ function apiPlugin(): Plugin {
         const url = new URL(req.url, "http://localhost");
 
         if (req.url.startsWith("/api/youtube/videos")) {
-          const limit = Math.min(Number(url.searchParams.get("limit")) || 12, 20);
+          const limit = Math.min(Number(url.searchParams.get("limit")) || 15, 20);
           const videos = await getChannelVideos(env, limit);
           res.setHeader("Content-Type", "application/json");
           res.setHeader("Cache-Control", "public, max-age=300");
