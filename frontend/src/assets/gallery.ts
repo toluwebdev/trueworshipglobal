@@ -25,22 +25,3 @@ export const galleryImages: GalleryImage[] = Object.entries(modules)
     };
   });
 
-export type HeroSlide = {
-  id: number;
-  image: string;
-  alt: string;
-  heading?: string;
-  ctas?: { label: string; href: string; external?: boolean }[];
-};
-
-export const heroSlides: HeroSlide[] = galleryImages.slice(0, 6).map((image, index) => ({
-  id: Number(image.id),
-  image: image.src,
-  alt: image.alt,
-  ctas:
-    index === 0
-      ? [{ label: "Latest Music", href: "#latest-music" }]
-      : index === 1
-        ? [{ label: "Latest Videos", href: "#latest-videos" }]
-        : [{ label: "View Gallery", href: "/gallery" }],
-}));

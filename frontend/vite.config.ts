@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import { defineConfig, loadEnv, type Plugin } from "vite";
 import { getLatestReleases } from "./api/_lib/spotify";
 import { getStoreProducts } from "./api/_lib/selar";
-import { getChannelVideos } from "./api/_lib/youtube";
+import { DEFAULT_VIDEO_LIMIT, getChannelVideos } from "./api/_lib/youtube";
 
 function apiPlugin(): Plugin {
   return {
@@ -20,7 +20,10 @@ function apiPlugin(): Plugin {
         const url = new URL(req.url, "http://localhost");
 
         if (req.url.startsWith("/api/youtube/videos")) {
-          const limit = Math.min(Number(url.searchParams.get("limit")) || 15, 20);
+          const limit = Math.min(
+            Number(url.searchParams.get("limit")) || DEFAULT_VIDEO_LIMIT,
+            20,
+          );
           const videos = await getChannelVideos(env, limit);
           res.setHeader("Content-Type", "application/json");
           res.setHeader("Cache-Control", "public, max-age=300");

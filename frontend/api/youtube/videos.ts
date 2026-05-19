@@ -1,4 +1,4 @@
-import { getChannelVideos } from "../_lib/youtube.js";
+import { DEFAULT_VIDEO_LIMIT, getChannelVideos } from "../_lib/youtube.js";
 
 export default async function handler(
   req: { method?: string; query?: { limit?: string } },
@@ -11,8 +11,8 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const limit = Math.min(Number(req.query?.limit) || 15, 20);
+  const limit = Math.min(Number(req.query?.limit) || DEFAULT_VIDEO_LIMIT, 20);
   const videos = await getChannelVideos(process.env, limit);
-  res.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate");
+  res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=600");
   return res.status(200).json(videos);
 }

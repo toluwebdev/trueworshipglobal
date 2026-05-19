@@ -19,7 +19,10 @@ export const curatedVideos: VideoItem[] = [
   { id: "doing-wonders", title: "DOING WONDERS", youtubeVideoId: "Zi9yLSoPCws" },
   { id: "yeshua", title: "YESHUA", youtubeVideoId: "6GzQbJVnsDI" },
   { id: "praise-medley", title: "PRAISE & WORSHIP MEDLEY", youtubeVideoId: "92BCPaEDc_E" },
-  { id: "atofarati", title: "ATOFARATI", youtubeVideoId: "PUanBPHOjmk" },
+  { id: "atofarati", title: "ATOFARATI", youtubeVideoId: "PUanBPHOmk" },
+  { id: "worship-medley-oghosa", title: "WORSHIP MEDLEY (OGHOSA)", youtubeVideoId: "O2A0uF7CJZQ" },
+  { id: "smile-on-gods-face", title: "SMILE ON GOD'S FACE", youtubeVideoId: "Rpe4HpVo808" },
+  { id: "joy-to-gods-heart", title: "JOY TO GOD'S HEART", youtubeVideoId: "vXOK94YGd-0" },
 ];
 
 export const manualVideos = curatedVideos;

@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
-import { heroSlides } from "../assets/gallery";
+import { heroSlides } from "../assets/hero";
 
 type SlideCta = {
   label: string;
@@ -79,14 +79,17 @@ const Hero = () => {
           transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
           className="absolute inset-0"
         >
-          <motion.img
-            src={slide.image}
-            alt={slide.alt}
-            className="h-full w-full object-cover"
-            initial={{ scale: 1.08 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 8, ease: "linear" }}
-          />
+          <picture>
+            <source media="(min-width: 768px)" srcSet={slide.desktop} />
+            <motion.img
+              src={slide.mobile}
+              alt={slide.alt}
+              className="h-full w-full object-cover"
+              initial={{ scale: 1.08 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 8, ease: "linear" }}
+            />
+          </picture>
           <div className="absolute inset-0 bg-black/45" />
         </motion.div>
       </AnimatePresence>

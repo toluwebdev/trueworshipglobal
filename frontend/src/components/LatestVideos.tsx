@@ -8,7 +8,7 @@ import {
   type VideoItem,
 } from "../lib/youtube";
 
-const VIDEO_LIMIT = 15;
+const VIDEO_LIMIT = 15; // must match DEFAULT_VIDEO_LIMIT in api/_lib/youtube.ts
 
 const LatestVideos = () => {
   const [videos, setVideos] = useState<VideoItem[]>([]);

@@ -16,7 +16,7 @@ export async function fetchVideoListWithFallback(
   limit = 15,
 ): Promise<VideoListResponse> {
   try {
-    const res = await fetch(`/api/youtube/videos?limit=${limit}`, {
+    const res = await fetch(`/api/youtube/videos?limit=${limit}&_=${Date.now()}`, {
       cache: "no-store",
     });
     if (!res.ok) throw new Error("YouTube API error");
