@@ -7,42 +7,49 @@ export type HeroSlide = {
   ctas?: { label: string; href: string; external?: boolean }[];
 };
 
-const desktopModules = import.meta.glob<{ default: string }>("./desktopHero/*.jpg", {
-  eager: true,
-});
+const assetModules = import.meta.glob<{ default: string }>(
+  [
+    "./02.jpg",
+    "./03.jpg",
+    "./09.jpg",
+    "./11.jpg",
+    "./15.jpg",
+    "./17.jpg",
+    "./32.jpg",
+    "./34.jpg",
+    "./38.jpg",
+    "./47.jpg",
+    "./50.jpg",
+    "./53.jpg",
+    "./66.jpg",
+    "./71.jpg",
+  ],
+  { eager: true },
+);
 
-const phoneModules = import.meta.glob<{ default: string }>("./phoneHero/*.jpg", {
-  eager: true,
-});
-
-function sortByNumber(pathA: string, pathB: string) {
-  const numA = Number.parseInt(pathA.match(/(\d+)\.jpg$/)?.[1] ?? "0", 10);
-  const numB = Number.parseInt(pathB.match(/(\d+)\.jpg$/)?.[1] ?? "0", 10);
-  return numA - numB;
+function assetImage(num: number): string {
+  const file = `./${String(num).padStart(2, "0")}.jpg`;
+  const mod = assetModules[file];
+  if (!mod) {
+    throw new Error(`Hero asset not found: ${file}`);
+  }
+  return mod.default;
 }
 
-function loadImages(modules: Record<string, { default: string }>) {
-  return Object.entries(modules)
-    .sort(([a], [b]) => sortByNumber(a, b))
-    .map(([path, mod]) => {
-      const id = path.match(/(\d+)\.jpg$/)?.[1] ?? path;
-      return { id, src: mod.default };
-    });
-}
+/** Desktop home header — order as specified */
+const DESKTOP_NUMBERS = [9, 2, 11, 32, 47, 53, 3, 15, 32] as const;
 
-const desktopImages = loadImages(desktopModules);
-const phoneImages = loadImages(phoneModules);
-const slideCount = Math.min(desktopImages.length, phoneImages.length);
+/** Mobile home header — order as specified */
+const MOBILE_NUMBERS = [9, 3, 11, 38, 50, 71, 17, 34, 66] as const;
 
-export const heroSlides: HeroSlide[] = Array.from({ length: slideCount }, (_, index) => {
-  const desktop = desktopImages[index]!;
-  const mobile = phoneImages[index]!;
+export const heroSlides: HeroSlide[] = DESKTOP_NUMBERS.map((desktopNum, index) => {
+  const mobileNum = MOBILE_NUMBERS[index]!;
 
   return {
     id: index,
-    desktop: desktop.src,
-    mobile: mobile.src,
-    alt: `Wole Emmanuel — hero ${desktop.id}`,
+    desktop: assetImage(desktopNum),
+    mobile: assetImage(mobileNum),
+    alt: `Wole Emmanuel — hero ${String(desktopNum).padStart(2, "0")}`,
     ctas:
       index === 0
         ? [{ label: "Latest Music", href: "#latest-music" }]

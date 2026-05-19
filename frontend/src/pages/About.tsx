@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import type { CSSProperties, ReactNode } from "react";
-import aboutImage from "../assets/45.jpg";
-import ministryImage from "../assets/about image.jpg";
+import founderImage from "../assets/56.jpg";
+import ministryImage from "../assets/45.jpg";
 import {
   bioParagraphs,
   corePillars,
@@ -127,7 +127,7 @@ const About = () => {
       </FixedBgSection>
 
       {/* Founder */}
-      <FixedBgSection image={aboutImage}>
+      <FixedBgSection image={founderImage}>
         <motion.h2
           custom={nextIndex()}
           variants={fadeUp}

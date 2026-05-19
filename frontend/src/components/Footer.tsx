@@ -117,7 +117,7 @@ const Footer = () => {
                   disabled={submitting}
                   className="inline-flex min-w-[140px] items-center justify-center border border-white/80 px-8 py-2.5 font-primary text-sm tracking-[0.3em] text-white uppercase transition hover:bg-white hover:text-black disabled:opacity-50"
                 >
-                  {submitting ? "Joining…" : "Join"}
+                  {submitting ? "Joining…" : "Join Our Mailing List"}
                 </button>
               </div>
             </form>
