@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Link, Navigate, useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import ArticleSkeleton from "../components/ArticleSkeleton";
+import DetailEndedBar from "../components/DetailEndedBar";
+import DetailRegisterBar from "../components/DetailRegisterBar";
 import { cmsApi, eventSubtitle, isEventUpcoming, type ApiEvent } from "../lib/api";
 
 const EventDetail = () => {
@@ -42,8 +44,7 @@ const EventDetail = () => {
     return <Navigate to="/events" replace />;
   }
 
-  const isUpcoming = isEventUpcoming(event.date);
-  const showRegister = isUpcoming && Boolean(event.registerUrl);
+  const showRegister = isEventUpcoming(event.date) && Boolean(event.registerUrl);
   const paragraphs = event.description.split(/\n\n+/);
 
   return (
@@ -54,28 +55,32 @@ const EventDetail = () => {
       transition={{ duration: 0.35 }}
     >
       <div className="relative aspect-[16/10] w-full overflow-hidden md:aspect-[21/9]">
-        <img
-          src={event.imageUrl}
-          alt=""
-          className="h-full w-full object-cover"
-        />
+        <img src={event.imageUrl} alt="" className="h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
       </div>
 
-      <div className="mx-auto max-w-3xl px-6 md:px-10">
-        <Link
-          to="/events"
-          className="mt-8 inline-block font-primary text-xs tracking-[0.25em] text-white/60 uppercase transition hover:text-white"
-        >
-          ← All events
-        </Link>
+      <motion.div className="mx-auto max-w-3xl px-6 md:px-10">
+        {showRegister ? (
+          <DetailRegisterBar
+            backTo="/events"
+            backLabel="All events"
+            registerUrl={event.registerUrl}
+            ctaLabel="Register now"
+          />
+        ) : (
+          <DetailEndedBar
+            backTo="/events"
+            backLabel="All events"
+            endedMessage="This event has ended"
+          />
+        )}
 
         <p className="mt-6 font-lato text-sm text-white/60">{eventSubtitle(event)}</p>
         <h1 className="mt-3 font-primary text-xl leading-snug tracking-wide text-white uppercase md:text-2xl">
           {event.title}
         </h1>
 
-        <div className="mt-8 space-y-5">
+        <motion.div className="mt-8 space-y-5">
           {paragraphs.map((paragraph, i) => (
             <p
               key={i}
@@ -84,35 +89,8 @@ const EventDetail = () => {
               {paragraph}
             </p>
           ))}
-        </div>
-      </div>
-
-      {showRegister && (
-        <motion.div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/15 bg-background/95 px-6 py-4 backdrop-blur-md md:px-10">
-          <div className="mx-auto flex max-w-3xl justify-center">
-            <a
-              href={event.registerUrl}
-              target={event.registerUrl.startsWith("http") ? "_blank" : undefined}
-              rel={
-                event.registerUrl.startsWith("http")
-                  ? "noopener noreferrer"
-                  : undefined
-              }
-              className="flex w-full max-w-md items-center justify-center border border-white bg-white px-8 py-3.5 font-primary text-sm tracking-[0.3em] text-black uppercase transition hover:bg-white/90"
-            >
-              Register now
-            </a>
-          </div>
         </motion.div>
-      )}
-
-      {!isUpcoming && (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/15 bg-background/95 px-6 py-4 backdrop-blur-md md:px-10">
-          <p className="text-center font-primary text-xs tracking-[0.25em] text-white/50 uppercase">
-            This event has ended
-          </p>
-        </div>
-      )}
+      </motion.div>
     </motion.div>
   );
 };

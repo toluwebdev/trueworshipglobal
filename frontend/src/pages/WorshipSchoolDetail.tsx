@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Link, Navigate, useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import ArticleSkeleton from "../components/ArticleSkeleton";
+import DetailEndedBar from "../components/DetailEndedBar";
+import DetailRegisterBar from "../components/DetailRegisterBar";
 import {
   classSubtitle,
   cmsApi,
@@ -47,8 +49,7 @@ const WorshipSchoolDetail = () => {
     return <Navigate to="/worship-school" replace />;
   }
 
-  const isUpcoming = isClassUpcoming(item.date);
-  const showRegister = isUpcoming && Boolean(item.registerUrl);
+  const showRegister = isClassUpcoming(item.date) && Boolean(item.registerUrl);
   const paragraphs = item.description.split(/\n\n+/);
 
   return (
@@ -58,18 +59,26 @@ const WorshipSchoolDetail = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35 }}
     >
-      <motion.div className="relative aspect-[16/10] w-full overflow-hidden md:aspect-[21/9]">
+      <div className="relative aspect-[16/10] w-full overflow-hidden md:aspect-[21/9]">
         <img src={item.imageUrl} alt="" className="h-full w-full object-cover" />
-        <motion.div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
-      </motion.div>
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+      </div>
 
       <motion.div className="mx-auto max-w-3xl px-6 md:px-10">
-        <Link
-          to="/worship-school"
-          className="mt-8 inline-block font-primary text-xs tracking-[0.25em] text-white/60 uppercase transition hover:text-white"
-        >
-          ← All classes
-        </Link>
+        {showRegister ? (
+          <DetailRegisterBar
+            backTo="/worship-school"
+            backLabel="All classes"
+            registerUrl={item.registerUrl}
+            ctaLabel="Enroll now"
+          />
+        ) : (
+          <DetailEndedBar
+            backTo="/worship-school"
+            backLabel="All classes"
+            endedMessage="This class has ended"
+          />
+        )}
 
         <p className="mt-6 font-lato text-sm text-white/60">{classSubtitle(item)}</p>
         <h1 className="mt-3 font-primary text-xl leading-snug tracking-wide text-white uppercase md:text-2xl">
@@ -87,33 +96,6 @@ const WorshipSchoolDetail = () => {
           ))}
         </motion.div>
       </motion.div>
-
-      {showRegister && (
-        <motion.div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/15 bg-background/95 px-6 py-4 backdrop-blur-md md:px-10">
-          <motion.div className="mx-auto flex max-w-3xl justify-center">
-            <a
-              href={item.registerUrl}
-              target={item.registerUrl.startsWith("http") ? "_blank" : undefined}
-              rel={
-                item.registerUrl.startsWith("http")
-                  ? "noopener noreferrer"
-                  : undefined
-              }
-              className="flex w-full max-w-md items-center justify-center border border-white bg-white px-8 py-3.5 font-primary text-sm tracking-[0.3em] text-black uppercase transition hover:bg-white/90"
-            >
-              Enroll now
-            </a>
-          </motion.div>
-        </motion.div>
-      )}
-
-      {!isUpcoming && (
-        <motion.div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/15 bg-background/95 px-6 py-4 backdrop-blur-md md:px-10">
-          <p className="text-center font-primary text-xs tracking-[0.25em] text-white/50 uppercase">
-            This class has ended
-          </p>
-        </motion.div>
-      )}
     </motion.div>
   );
 };
