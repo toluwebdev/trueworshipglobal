@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import worshipSchoolHero from "../assets/worshipSchool.jpeg";
 import CardSkeleton from "../components/CardSkeleton";
 import {
   classSubtitle,
@@ -56,20 +57,34 @@ const WorshipSchool = () => {
 
   return (
     <motion.div
-      className="min-h-screen bg-background px-6 pb-24 pt-28 text-white md:px-10"
+      className="min-h-screen bg-background pb-24 text-white"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35 }}
     >
-      <motion.div className="mx-auto max-w-7xl">
-        <h1 className="mb-4 text-center font-primary text-sm tracking-[0.35em] uppercase md:text-base">
-          Worship School Academy
-        </h1>
-        <p className="mx-auto mb-12 max-w-2xl text-center font-lato text-base leading-relaxed text-white/75 md:mb-16 md:text-lg">
-          Intensive, spirit-led training to awaken worshippers, refine gifts, and deepen
-          intimacy with the Father.
-        </p>
+      <header className="relative flex min-h-[42vh] items-end overflow-hidden md:min-h-[50vh]">
+        <img
+          src={worshipSchoolHero}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-background/55" />
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"
+          aria-hidden
+        />
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-12 pt-32 md:px-10 md:pb-16 md:pt-36">
+          <h1 className="font-primary text-sm tracking-[0.35em] uppercase md:text-base">
+            Worship School Academy
+          </h1>
+          <p className="mt-4 max-w-2xl font-lato text-base leading-relaxed text-white/85 md:text-lg md:leading-relaxed">
+            Intensive, spirit-led training to awaken worshippers, refine gifts, and deepen
+            intimacy with the Father.
+          </p>
+        </div>
+      </header>
 
+      <motion.div className="mx-auto max-w-7xl px-6 pt-12 md:px-10 md:pt-16">
         {loading && (
           <section aria-label="Loading classes">
             <motion.div className="mb-8 h-3 w-24 skeleton rounded-sm md:mb-10" />
@@ -97,6 +112,7 @@ const WorshipSchool = () => {
     </motion.div>
   );
 };
+
 
 const ClassSection = ({
   title,
