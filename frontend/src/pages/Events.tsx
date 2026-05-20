@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import CardSkeleton from "../components/CardSkeleton";
-import { cmsApi, eventSubtitle, isEventUpcoming, type ApiEvent } from "../lib/api";
+import { cmsApi, eventSubtitle, getEventPath, isEventUpcoming, type ApiEvent } from "../lib/api";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 16 },
@@ -117,7 +117,7 @@ const EventSection = ({
 const EventCard = ({ event, index }: { event: ApiEvent; index: number }) => (
   <motion.div custom={index} variants={cardVariants} initial="hidden" animate="visible">
     <Link
-      to={`/events/${event._id}`}
+      to={getEventPath(event)}
       className="group block overflow-hidden bg-neutral-900/50 transition hover:bg-neutral-900"
     >
       <div className="aspect-[4/3] overflow-hidden">

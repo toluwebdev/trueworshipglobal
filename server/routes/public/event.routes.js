@@ -1,5 +1,6 @@
 import { Router } from "express";
 import Event from "../../schema/eventSchema.js";
+import { findEventByIdOrSlug } from "../../utils/findEvent.js";
 
 const router = Router();
 
@@ -12,9 +13,9 @@ router.get("/", async (_req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:slug", async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id);
+    const event = await findEventByIdOrSlug(req.params.slug);
     if (!event) return res.status(404).json({ error: "Event not found" });
     res.json(event);
   } catch (err) {

@@ -67,7 +67,7 @@ const App = () => {
               }
             />
             <Route
-              path="/events/:eventId"
+              path="/events/:eventSlug"
               element={
                 <AnimatedPage>
                   <EventDetail />

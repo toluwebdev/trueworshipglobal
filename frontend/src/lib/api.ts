@@ -31,6 +31,7 @@ export type ApiBlog = {
 
 export type ApiEvent = {
   _id: string;
+  slug?: string;
   title: string;
   description: string;
   imageUrl: string;
@@ -49,7 +50,7 @@ export const cmsApi = {
   },
   events: {
     list: () => request<ApiEvent[]>("/api/events"),
-    get: (id: string) => request<ApiEvent>(`/api/events/${id}`),
+    get: (slug: string) => request<ApiEvent>(`/api/events/${encodeURIComponent(slug)}`),
   },
   worshipSchool: {
     list: () => request<ApiWorshipClass[]>("/api/worship-school"),
@@ -117,4 +118,22 @@ export function isEventUpcoming(date: string): boolean {
   today.setHours(0, 0, 0, 0);
   d.setHours(0, 0, 0, 0);
   return d >= today;
+}
+
+export function slugifyTitle(title: string): string {
+  return title
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
+export function getEventSlug(event: ApiEvent): string {
+  return event.slug || slugifyTitle(event.title);
+}
+
+export function getEventPath(event: ApiEvent): string {
+  return `/events/${getEventSlug(event)}`;
 }

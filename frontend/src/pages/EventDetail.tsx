@@ -1,25 +1,26 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import ArticleSkeleton from "../components/ArticleSkeleton";
 import DetailEndedBar from "../components/DetailEndedBar";
 import DetailRegisterBar from "../components/DetailRegisterBar";
-import { cmsApi, eventSubtitle, isEventUpcoming, type ApiEvent } from "../lib/api";
+import { cmsApi, eventSubtitle, getEventPath, getEventSlug, isEventUpcoming, type ApiEvent } from "../lib/api";
 
 const EventDetail = () => {
-  const { eventId } = useParams<{ eventId: string }>();
+  const { eventSlug } = useParams<{ eventSlug: string }>();
+  const navigate = useNavigate();
   const [event, setEvent] = useState<ApiEvent | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    if (!eventId) return;
+    if (!eventSlug) return;
     let cancelled = false;
     (async () => {
       setLoading(true);
       setNotFound(false);
       try {
-        const data = await cmsApi.events.get(eventId);
+        const data = await cmsApi.events.get(eventSlug);
         if (!cancelled) setEvent(data);
       } catch {
         if (!cancelled) setNotFound(true);
@@ -30,9 +31,17 @@ const EventDetail = () => {
     return () => {
       cancelled = true;
     };
-  }, [eventId]);
+  }, [eventSlug]);
 
-  if (!eventId) {
+  useEffect(() => {
+    if (!event || !eventSlug) return;
+    const canonical = getEventSlug(event);
+    if (eventSlug !== canonical) {
+      navigate(getEventPath(event), { replace: true });
+    }
+  }, [event, eventSlug, navigate]);
+
+  if (!eventSlug) {
     return <Navigate to="/events" replace />;
   }
 
