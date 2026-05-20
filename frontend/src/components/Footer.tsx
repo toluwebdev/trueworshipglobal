@@ -1,9 +1,10 @@
-import { motion } from "framer-motion";
 import { useState, type FormEvent } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { contact, initiatives, mailingListCopy } from "../assets/about";
 import data from "../assets/data";
 import { cmsApi } from "../lib/api";
+import InViewSection from "./InViewSection";
+import { InViewItem, InViewStagger } from "./InViewStagger";
 import SocialIcon, { type IconName } from "./SocialIcon";
 
 const Footer = () => {
@@ -45,36 +46,35 @@ const Footer = () => {
       id="footer"
       className=" bg-background px-6 pb-16 pt-16 md:px-10 md:pb-24 md:pt-20"
     >
-      <motion.div
-        className="mx-auto max-w-3xl text-center"
-        initial={{ opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-40px" }}
-        transition={{ duration: 0.45 }}
-      >
-        <nav
-          className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 md:gap-x-14"
-          aria-label="Ministry links"
-        >
-          {initiatives.map((item) => (
-            <Link
-              key={item.label}
-              to={item.href}
-              onClick={() => onNavClick(item.href)}
-              className="font-secondary text-lg tracking-[0.2em] text-white transition hover:text-white/70 md:text-xl"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+      <div className="mx-auto max-w-3xl text-center">
+        <InViewSection as="nav" aria-label="Ministry links">
+          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 md:gap-x-14">
+            {initiatives.map((item) => (
+              <Link
+                key={item.label}
+                to={item.href}
+                onClick={() => onNavClick(item.href)}
+                className="font-secondary text-lg tracking-[0.2em] text-white transition hover:text-white/70 md:text-xl"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </InViewSection>
 
-        <section className="mx-auto mt-16 max-w-lg md:mt-20">
-          <p className="font-lato text-base leading-relaxed text-white/90 md:text-lg">
-            {mailingListCopy.lead}
-          </p>
-          <p className="mt-4 font-lato text-base text-white/90 md:text-lg">
-            {mailingListCopy.sub}
-          </p>
+        <InViewSection as="section" className="mx-auto mt-16 max-w-lg md:mt-20">
+          <InViewStagger className="space-y-4">
+            <InViewItem>
+              <p className="font-lato text-base leading-relaxed text-white/90 md:text-lg">
+                {mailingListCopy.lead}
+              </p>
+            </InViewItem>
+            <InViewItem>
+              <p className="font-lato text-base text-white/90 md:text-lg">
+                {mailingListCopy.sub}
+              </p>
+            </InViewItem>
+          </InViewStagger>
 
           {submitted ? (
             <p className="mt-10 font-primary text-sm tracking-[0.25em] text-white uppercase">
@@ -122,41 +122,47 @@ const Footer = () => {
               </div>
             </form>
           )}
-        </section>
+        </InViewSection>
 
-        <div className="mt-16 pt-16 md:mt-20">
-          
-          <p className="mt-6 font-secondary text-xl tracking-[0.15em] text-white md:text-2xl">
-            {contact.organization}
-          </p>
-          <a
-            href={`mailto:${contact.email}`}
-            className="mt-4 inline-block font-lato text-base text-white/80 underline-offset-4 transition hover:text-white hover:underline md:text-lg"
-          >
-            {contact.email}
-          </a>
-
-          <ul className="mt-12 flex flex-wrap items-center justify-center gap-5">
-            {data.socialLinks.map((link) => (
-              <li key={link.name}>
-                <a
-                  href={link.href}
-                  target={link.href.startsWith("http") ? "_blank" : undefined}
-                  rel={
-                    link.href.startsWith("http")
-                      ? "noopener noreferrer"
-                      : undefined
-                  }
-                  className="text-white/80 transition hover:text-white"
-                  aria-label={link.label}
-                >
-                  <SocialIcon name={link.name as IconName} className="h-5 w-5" />
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </motion.div>
+        <InViewSection as="div" className="mt-16 pt-16 md:mt-20">
+          <InViewStagger className="space-y-6">
+            <InViewItem>
+              <p className="font-secondary text-xl tracking-[0.15em] text-white md:text-2xl">
+                {contact.organization}
+              </p>
+            </InViewItem>
+            <InViewItem>
+              <a
+                href={`mailto:${contact.email}`}
+                className="inline-block font-lato text-base text-white/80 underline-offset-4 transition hover:text-white hover:underline md:text-lg"
+              >
+                {contact.email}
+              </a>
+            </InViewItem>
+            <InViewItem>
+              <ul className="flex flex-wrap items-center justify-center gap-5">
+                {data.socialLinks.map((link) => (
+                  <li key={link.name}>
+                    <a
+                      href={link.href}
+                      target={link.href.startsWith("http") ? "_blank" : undefined}
+                      rel={
+                        link.href.startsWith("http")
+                          ? "noopener noreferrer"
+                          : undefined
+                      }
+                      className="text-white/80 transition hover:text-white"
+                      aria-label={link.label}
+                    >
+                      <SocialIcon name={link.name as IconName} className="h-5 w-5" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </InViewItem>
+          </InViewStagger>
+        </InViewSection>
+      </div>
     </footer>
   );
 };

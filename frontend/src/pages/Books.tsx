@@ -1,19 +1,12 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import InViewSection from "../components/InViewSection";
 import {
   fetchStoreBooksWithFallback,
   SELAR_STORE_URL,
   type BookItem,
 } from "../lib/selar";
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.06, duration: 0.4 },
-  }),
-};
+import { cardReveal, VIEWPORT } from "../lib/motion";
 
 const Books = () => {
   const [books, setBooks] = useState<BookItem[]>([]);
@@ -40,13 +33,8 @@ const Books = () => {
 
   return (
     <div className="min-h-screen bg-background px-6 pb-24 pt-28 md:px-10">
-      <motion.div
-        className="mx-auto max-w-7xl"
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-      >
-        <div className="mb-10 flex flex-wrap items-end justify-between gap-4 md:mb-14">
+      <div className="mx-auto max-w-7xl">
+        <InViewSection as="div" className="mb-10 flex flex-wrap items-end justify-between gap-4 md:mb-14">
           <h1 className="font-primary text-sm tracking-[0.35em] text-white uppercase md:text-base">
             Books
           </h1>
@@ -58,12 +46,12 @@ const Books = () => {
           >
             View on Selar →
           </a>
-        </div>
+        </InViewSection>
 
         {fromFallback && !loading && (
-          <p className="mb-8 font-lato text-sm text-white/50">
+          <InViewSection as="p" className="mb-8 font-lato text-sm text-white/50">
             Showing saved listings — live store sync will resume shortly.
-          </p>
+          </InViewSection>
         )}
 
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -82,9 +70,10 @@ const Books = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   custom={i}
-                  variants={cardVariants}
+                  variants={cardReveal}
                   initial="hidden"
-                  animate="visible"
+                  whileInView="visible"
+                  viewport={VIEWPORT}
                   className="group flex flex-col"
                 >
                   <div className="relative aspect-[4/5] overflow-hidden bg-neutral-900">
@@ -118,7 +107,7 @@ const Books = () => {
                 </motion.a>
               ))}
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

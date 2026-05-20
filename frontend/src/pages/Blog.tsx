@@ -2,21 +2,14 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import CardSkeleton from "../components/CardSkeleton";
+import InViewSection from "../components/InViewSection";
 import {
   blogExcerpt,
   cmsApi,
   formatBlogDate,
   type ApiBlog,
 } from "../lib/api";
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.05, duration: 0.35 },
-  }),
-};
+import { cardReveal, VIEWPORT } from "../lib/motion";
 
 const Blog = () => {
   const [posts, setPosts] = useState<ApiBlog[]>([]);
@@ -45,16 +38,13 @@ const Blog = () => {
   }, []);
 
   return (
-    <motion.div
-      className="min-h-screen bg-background px-6 pb-24 pt-28 text-white md:px-10"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.35 }}
-    >
-      <motion.div className="mx-auto max-w-7xl">
-        <h1 className="mb-12 text-center font-primary text-sm tracking-[0.35em] uppercase md:mb-16 md:text-base">
-          Blog
-        </h1>
+    <div className="min-h-screen bg-background px-6 pb-24 pt-28 text-white md:px-10">
+      <div className="mx-auto max-w-7xl">
+        <InViewSection as="div" className="mb-12 text-center md:mb-16">
+          <h1 className="font-primary text-sm tracking-[0.35em] uppercase md:text-base">
+            Blog
+          </h1>
+        </InViewSection>
 
         {loading && (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -65,13 +55,15 @@ const Blog = () => {
         )}
 
         {error && (
-          <p className="text-center font-lato text-sm text-red-300">{error}</p>
+          <InViewSection as="p" className="text-center font-lato text-sm text-red-300">
+            {error}
+          </InViewSection>
         )}
 
         {!loading && !error && posts.length === 0 && (
-          <p className="text-center font-lato text-sm text-white/50">
+          <InViewSection as="p" className="text-center font-lato text-sm text-white/50">
             No published posts yet. Check back soon.
-          </p>
+          </InViewSection>
         )}
 
         {!loading && !error && posts.length > 0 && (
@@ -81,18 +73,24 @@ const Blog = () => {
             ))}
           </div>
         )}
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 
 const BlogCard = ({ post, index }: { post: ApiBlog; index: number }) => (
-  <motion.div custom={index} variants={cardVariants} initial="hidden" animate="visible">
+  <motion.div
+    custom={index}
+    variants={cardReveal}
+    initial="hidden"
+    whileInView="visible"
+    viewport={VIEWPORT}
+  >
     <Link
       to={`/blog/${post._id}`}
       className="group block overflow-hidden bg-neutral-900/50 transition hover:bg-neutral-900"
     >
-      <motion.div className="aspect-[4/3] overflow-hidden">
+      <div className="aspect-[4/3] overflow-hidden">
         <img
           src={post.imageUrl}
           alt=""
@@ -100,7 +98,7 @@ const BlogCard = ({ post, index }: { post: ApiBlog; index: number }) => (
           decoding="async"
           className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
         />
-      </motion.div>
+      </div>
       <div className="p-5">
         <p className="font-lato text-xs text-white/50">
           {formatBlogDate(post.publishedAt, post.createdAt)}

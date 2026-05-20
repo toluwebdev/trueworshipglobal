@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { useEffect, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
 import { bankTransferDetails } from "../assets/donate";
+import InViewSection from "../components/InViewSection";
+import { InViewItem, InViewStagger } from "../components/InViewStagger";
 import {
   getPaystackPublicKey,
   startDonation,
@@ -12,11 +14,6 @@ import {
 const PRESET_AMOUNTS = [1_000, 5_000, 10_000, 25_000, 50_000] as const;
 
 type PaymentMethod = "paystack" | "bank";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-};
 
 const Donate = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -143,31 +140,18 @@ const Donate = () => {
       : null;
 
   return (
-    <motion.div
-      className="min-h-screen bg-background px-6 pb-24 pt-28 text-white md:px-10"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.35 }}
-    >
+    <div className="min-h-screen bg-background px-6 pb-24 pt-28 text-white md:px-10">
       <div className="mx-auto max-w-xl">
-        <motion.h1
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          className="mb-4 text-center font-primary text-sm tracking-[0.35em] uppercase md:text-base"
-        >
-          Give
-        </motion.h1>
+        <InViewSection as="div" className="mb-4 text-center">
+          <h1 className="font-primary text-sm tracking-[0.35em] uppercase md:text-base">
+            Give
+          </h1>
+        </InViewSection>
 
-        <motion.p
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          className="mb-10 text-center font-lato text-base leading-relaxed text-white/80 md:text-lg"
-        >
+        <InViewSection as="p" className="mb-10 text-center font-lato text-base leading-relaxed text-white/80 md:text-lg">
           Partner with True Worship Global to advance worship, teaching, and ministry
           across the nations. Every gift helps us reach more lives with the gospel.
-        </motion.p>
+        </InViewSection>
 
         {verifying && (
           <p className="mb-8 text-center font-lato text-sm text-white/60">
@@ -206,12 +190,12 @@ const Donate = () => {
         )}
 
         {!paymentResult?.ok && (
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
+          <InViewSection
+            as="div"
             className="space-y-8 rounded-sm border border-white/10 bg-surface/40 px-6 py-10 md:px-10"
           >
+            <InViewStagger className="space-y-8">
+            <InViewItem>
             <div>
               <p className="mb-4 font-primary text-xs tracking-[0.25em] text-white/70 uppercase">
                 How would you like to give?
@@ -241,7 +225,9 @@ const Donate = () => {
                 </button>
               </div>
             </div>
+            </InViewItem>
 
+            <InViewItem>
             <div>
               <p className="mb-4 font-primary text-xs tracking-[0.25em] text-white/70 uppercase">
                 Select amount (NGN)
@@ -280,8 +266,10 @@ const Donate = () => {
                 />
               </label>
             </div>
+            </InViewItem>
 
             {paymentMethod === "bank" ? (
+              <InViewItem>
               <div className="space-y-5 border border-gold/30 bg-gold/5 px-5 py-6">
                 <p className="font-primary text-xs tracking-[0.25em] text-gold uppercase">
                   Transfer to this account
@@ -325,7 +313,9 @@ const Donate = () => {
                   gift. Thank you for partnering with us.
                 </p>
               </div>
+              </InViewItem>
             ) : (
+              <InViewItem>
               <form onSubmit={onSubmit} className="space-y-8">
                 <label className="block">
                   <span className="mb-2 block font-primary text-xs tracking-[0.2em] text-white/70 uppercase">
@@ -379,11 +369,13 @@ const Donate = () => {
                   USSD where available.
                 </p>
               </form>
+              </InViewItem>
             )}
-          </motion.div>
+            </InViewStagger>
+          </InViewSection>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 };
 

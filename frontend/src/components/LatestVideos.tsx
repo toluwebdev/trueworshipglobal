@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import InViewSection from "./InViewSection";
+import { fadeUp, VIEWPORT } from "../lib/motion";
 import {
   fetchVideoListWithFallback,
   findVideoBySlug,
@@ -111,22 +113,13 @@ const LatestVideos = () => {
 
   return (
     <section id="latest-videos" className="bg-background px-6 py-16 text-white md:py-24">
-      <motion.h2
-        className="mb-10 text-center font-primary text-sm tracking-[0.35em] uppercase md:mb-14 md:text-base"
-        initial={{ opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.4 }}
-      >
-        Latest Videos
-      </motion.h2>
+      <InViewSection as="div" className="mb-10 text-center md:mb-14">
+        <h2 className="font-primary text-sm tracking-[0.35em] uppercase md:text-base">
+          Latest Videos
+        </h2>
+      </InViewSection>
 
-      <motion.div
-        className="mx-auto max-w-5xl"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.1 }}
-      >
+      <InViewSection as="div" className="mx-auto max-w-5xl">
         {loading ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <motion.div className="aspect-video w-full animate-pulse bg-neutral-800" />
@@ -141,9 +134,10 @@ const LatestVideos = () => {
           </motion.div>
         ) : playable.length > 0 && activeId ? (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={VIEWPORT}
           >
             <div className="aspect-video w-full overflow-hidden bg-black">
               <iframe
@@ -158,9 +152,11 @@ const LatestVideos = () => {
 
             <motion.div
               className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 md:mt-8 md:gap-4"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.4 }}
+              variants={fadeUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={VIEWPORT}
+              transition={{ delay: 0.12 }}
             >
               {playable.map((video) => {
                 const id = video.youtubeVideoId!;
@@ -200,7 +196,7 @@ const LatestVideos = () => {
             </a>
           </div>
         )}
-      </motion.div>
+      </InViewSection>
     </section>
   );
 };

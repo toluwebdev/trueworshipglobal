@@ -1,6 +1,8 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import { galleryImages, type GalleryImage } from "../assets/gallery";
+import InViewSection from "../components/InViewSection";
+import { cardReveal, VIEWPORT_TIGHT } from "../lib/motion";
 
 const Gallery = () => {
   const [active, setActive] = useState<GalleryImage | null>(null);
@@ -39,31 +41,25 @@ const Gallery = () => {
 
   return (
     <div className="min-h-screen bg-background px-6 pb-24 pt-28 md:px-10">
-      <motion.h1
-        className="mb-10 text-center font-primary text-sm tracking-[0.35em] uppercase md:mb-14 md:text-base"
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-      >
-        Gallery
-      </motion.h1>
+      <InViewSection as="div" className="mb-10 text-center md:mb-14">
+        <h1 className="font-primary text-sm tracking-[0.35em] uppercase md:text-base">
+          Gallery
+        </h1>
+      </InViewSection>
 
-      <motion.div
+      <InViewSection
+        as="div"
         className="mx-auto max-w-7xl columns-2 gap-3 sm:columns-3 md:gap-4 lg:columns-4"
-        initial="hidden"
-        animate="visible"
-        variants={{
-          visible: { transition: { staggerChildren: 0.02 } },
-        }}
       >
-        {galleryImages.map((image) => (
+        {galleryImages.map((image, i) => (
           <motion.button
             key={image.id}
             type="button"
-            variants={{
-              hidden: { opacity: 0, y: 16 },
-              visible: { opacity: 1, y: 0, transition: { duration: 0.35 } },
-            }}
+            custom={i}
+            variants={cardReveal}
+            initial="hidden"
+            whileInView="visible"
+            viewport={VIEWPORT_TIGHT}
             className="group relative mb-3 block w-full break-inside-avoid overflow-hidden bg-neutral-900 md:mb-4"
             onClick={() => setActive(image)}
           >
@@ -77,7 +73,7 @@ const Gallery = () => {
             <div className="pointer-events-none absolute inset-0 bg-black/0 transition duration-300 group-hover:bg-black/25" />
           </motion.button>
         ))}
-      </motion.div>
+      </InViewSection>
 
       <AnimatePresence>
         {active && activeIndex >= 0 && (

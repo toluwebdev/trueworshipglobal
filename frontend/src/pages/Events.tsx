@@ -2,16 +2,9 @@ import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import CardSkeleton from "../components/CardSkeleton";
+import InViewSection from "../components/InViewSection";
 import { cmsApi, eventSubtitle, getEventPath, isEventUpcoming, type ApiEvent } from "../lib/api";
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.05, duration: 0.35 },
-  }),
-};
+import { cardReveal, VIEWPORT } from "../lib/motion";
 
 const Events = () => {
   const [events, setEvents] = useState<ApiEvent[]>([]);
@@ -50,16 +43,13 @@ const Events = () => {
   }, [events]);
 
   return (
-    <motion.div
-      className="min-h-screen bg-background px-6 pb-24 pt-28 text-white md:px-10"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.35 }}
-    >
+    <div className="min-h-screen bg-background px-6 pb-24 pt-28 text-white md:px-10">
       <div className="mx-auto max-w-7xl">
-        <h1 className="mb-12 text-center font-primary text-sm tracking-[0.35em] uppercase md:mb-16 md:text-base">
-          Events
-        </h1>
+        <InViewSection as="div" className="mb-12 text-center md:mb-16">
+          <h1 className="font-primary text-sm tracking-[0.35em] uppercase md:text-base">
+            Events
+          </h1>
+        </InViewSection>
 
         {loading && (
           <section aria-label="Loading events">
@@ -73,7 +63,9 @@ const Events = () => {
         )}
 
         {error && (
-          <p className="text-center font-lato text-sm text-red-300">{error}</p>
+          <InViewSection as="p" className="text-center font-lato text-sm text-red-300">
+            {error}
+          </InViewSection>
         )}
 
         {!loading && !error && (
@@ -85,7 +77,7 @@ const Events = () => {
           </>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -98,7 +90,7 @@ const EventSection = ({
   events: ApiEvent[];
   className?: string;
 }) => (
-  <section className={className} aria-label={title}>
+  <InViewSection as="section" className={className} aria-label={title}>
     <h2 className="mb-8 font-primary text-xs tracking-[0.3em] text-white/60 uppercase md:mb-10">
       {title}
     </h2>
@@ -111,11 +103,17 @@ const EventSection = ({
         ))}
       </div>
     )}
-  </section>
+  </InViewSection>
 );
 
 const EventCard = ({ event, index }: { event: ApiEvent; index: number }) => (
-  <motion.div custom={index} variants={cardVariants} initial="hidden" animate="visible">
+  <motion.div
+    custom={index}
+    variants={cardReveal}
+    initial="hidden"
+    whileInView="visible"
+    viewport={VIEWPORT}
+  >
     <Link
       to={getEventPath(event)}
       className="group block overflow-hidden bg-neutral-900/50 transition hover:bg-neutral-900"

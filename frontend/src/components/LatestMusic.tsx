@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import InViewSection from "./InViewSection";
+import { slideInRight, VIEWPORT_TIGHT } from "../lib/motion";
 import {
   fetchLatestReleases,
   SPOTIFY_ARTIST_URL,
@@ -7,15 +9,6 @@ import {
 } from "../lib/spotify";
 
 const RELEASE_LIMIT = 10;
-
-const cardVariants = {
-  hidden: { opacity: 0, x: 24 },
-  visible: (i: number) => ({
-    opacity: 1,
-    x: 0,
-    transition: { delay: i * 0.06, duration: 0.4 },
-  }),
-};
 
 const LatestMusic = () => {
   const [releases, setReleases] = useState<SpotifyRelease[]>([]);
@@ -58,14 +51,8 @@ const LatestMusic = () => {
   };
 
   return (
-    <section id="latest-music" className="bg-background px-6 py-16 md:px-10 md:py-24">
-      <motion.div
-        className="mx-auto max-w-7xl"
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-80px" }}
-        transition={{ duration: 0.5 }}
-      >
+    <InViewSection id="latest-music" as="section" className="bg-background px-6 py-16 md:px-10 md:py-24">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
           <h2 className="font-secondary text-4xl uppercase tracking-tight text-white md:text-5xl">
             Latest Music
@@ -132,10 +119,10 @@ const LatestMusic = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     custom={i}
-                    variants={cardVariants}
+                    variants={slideInRight}
                     initial="hidden"
                     whileInView="visible"
-                    viewport={{ once: true, margin: "-40px" }}
+                    viewport={VIEWPORT_TIGHT}
                     className="group w-[min(85vw,280px)] shrink-0 snap-start md:w-[320px]"
                   >
                     <div className="relative aspect-square overflow-hidden rounded bg-neutral-900">
@@ -166,8 +153,8 @@ const LatestMusic = () => {
           </div>
         </motion.div>
         )}
-      </motion.div>
-    </section>
+      </div>
+    </InViewSection>
   );
 };
 
