@@ -6,6 +6,11 @@ const worshipSchoolClassSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    slug: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
     description: {
       type: String,
       required: true,

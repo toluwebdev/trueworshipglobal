@@ -1,30 +1,33 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import ArticleSkeleton from "../components/ArticleSkeleton";
 import DetailEndedBar from "../components/DetailEndedBar";
 import DetailRegisterBar from "../components/DetailRegisterBar";
 import {
   classSubtitle,
   cmsApi,
+  getWorshipClassPath,
+  getWorshipClassSlug,
   isClassUpcoming,
   type ApiWorshipClass,
 } from "../lib/api";
 
 const WorshipSchoolDetail = () => {
-  const { classId } = useParams<{ classId: string }>();
+  const { classSlug } = useParams<{ classSlug: string }>();
+  const navigate = useNavigate();
   const [item, setItem] = useState<ApiWorshipClass | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    if (!classId) return;
+    if (!classSlug) return;
     let cancelled = false;
     (async () => {
       setLoading(true);
       setNotFound(false);
       try {
-        const data = await cmsApi.worshipSchool.get(classId);
+        const data = await cmsApi.worshipSchool.get(classSlug);
         if (!cancelled) setItem(data);
       } catch {
         if (!cancelled) setNotFound(true);
@@ -35,9 +38,17 @@ const WorshipSchoolDetail = () => {
     return () => {
       cancelled = true;
     };
-  }, [classId]);
+  }, [classSlug]);
 
-  if (!classId) {
+  useEffect(() => {
+    if (!item || !classSlug) return;
+    const canonical = getWorshipClassSlug(item);
+    if (classSlug !== canonical) {
+      navigate(getWorshipClassPath(item), { replace: true });
+    }
+  }, [item, classSlug, navigate]);
+
+  if (!classSlug) {
     return <Navigate to="/worship-school" replace />;
   }
 

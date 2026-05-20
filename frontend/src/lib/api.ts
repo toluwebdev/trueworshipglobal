@@ -54,7 +54,8 @@ export const cmsApi = {
   },
   worshipSchool: {
     list: () => request<ApiWorshipClass[]>("/api/worship-school"),
-    get: (id: string) => request<ApiWorshipClass>(`/api/worship-school/${id}`),
+    get: (slug: string) =>
+      request<ApiWorshipClass>(`/api/worship-school/${encodeURIComponent(slug)}`),
   },
   mailing: {
     subscribe: (name: string, email: string) =>
@@ -136,4 +137,12 @@ export function getEventSlug(event: ApiEvent): string {
 
 export function getEventPath(event: ApiEvent): string {
   return `/events/${getEventSlug(event)}`;
+}
+
+export function getWorshipClassSlug(item: ApiWorshipClass): string {
+  return item.slug || slugifyTitle(item.title);
+}
+
+export function getWorshipClassPath(item: ApiWorshipClass): string {
+  return `/worship-school/${getWorshipClassSlug(item)}`;
 }

@@ -83,7 +83,7 @@ const App = () => {
               }
             />
             <Route
-              path="/worship-school/:classId"
+              path="/worship-school/:classSlug"
               element={
                 <AnimatedPage>
                   <WorshipSchoolDetail />

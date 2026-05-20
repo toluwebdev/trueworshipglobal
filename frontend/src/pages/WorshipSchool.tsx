@@ -6,6 +6,7 @@ import CardSkeleton from "../components/CardSkeleton";
 import {
   classSubtitle,
   cmsApi,
+  getWorshipClassPath,
   isClassUpcoming,
   type ApiWorshipClass,
 } from "../lib/api";
@@ -144,7 +145,7 @@ const ClassSection = ({
 const ClassCard = ({ item, index }: { item: ApiWorshipClass; index: number }) => (
   <motion.div custom={index} variants={cardVariants} initial="hidden" animate="visible">
     <Link
-      to={`/worship-school/${item._id}`}
+      to={getWorshipClassPath(item)}
       className="group block overflow-hidden bg-neutral-900/50 transition hover:bg-neutral-900"
     >
       <motion.div className="aspect-[4/3] overflow-hidden">

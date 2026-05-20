@@ -1,5 +1,9 @@
 import { Router } from "express";
 import WorshipSchoolClass from "../../schema/worshipSchoolClassSchema.js";
+import {
+  assignWorshipClassSlug,
+  findWorshipClassByIdOrSlug,
+} from "../../utils/findWorshipClass.js";
 
 const router = Router();
 
@@ -12,9 +16,9 @@ router.get("/", async (_req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:slug", async (req, res) => {
   try {
-    const item = await WorshipSchoolClass.findById(req.params.id);
+    const item = await findWorshipClassByIdOrSlug(req.params.slug);
     if (!item) {
       return res.status(404).json({ error: "Class not found" });
     }
@@ -26,7 +30,9 @@ router.get("/:id", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    const item = await WorshipSchoolClass.create(req.body);
+    const item = new WorshipSchoolClass(req.body);
+    await assignWorshipClassSlug(item);
+    await item.save();
     res.status(201).json(item);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -35,13 +41,19 @@ router.post("/", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
   try {
-    const item = await WorshipSchoolClass.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const item = await WorshipSchoolClass.findById(req.params.id);
     if (!item) {
       return res.status(404).json({ error: "Class not found" });
     }
+
+    const titleChanged = req.body.title && req.body.title !== item.title;
+    Object.assign(item, req.body);
+
+    if (titleChanged || !item.slug) {
+      await assignWorshipClassSlug(item);
+    }
+
+    await item.save();
     res.json(item);
   } catch (err) {
     res.status(400).json({ error: err.message });
