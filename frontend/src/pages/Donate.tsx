@@ -22,7 +22,7 @@ const Donate = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const referenceParam = searchParams.get("reference");
 
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("paystack");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("bank");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [amount, setAmount] = useState<number>(PRESET_AMOUNTS[0]);
@@ -219,17 +219,6 @@ const Donate = () => {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  onClick={() => setPaymentMethod("paystack")}
-                  className={`border px-3 py-3 font-primary text-xs tracking-wider uppercase transition ${
-                    paymentMethod === "paystack"
-                      ? "border-gold bg-gold text-black"
-                      : "border-gold/50 text-gold hover:border-gold hover:bg-gold/10"
-                  }`}
-                >
-                  Paystack
-                </button>
-                <button
-                  type="button"
                   onClick={() => setPaymentMethod("bank")}
                   className={`border px-3 py-3 font-primary text-xs tracking-wider uppercase transition ${
                     paymentMethod === "bank"
@@ -238,6 +227,17 @@ const Donate = () => {
                   }`}
                 >
                   Bank transfer
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("paystack")}
+                  className={`border px-3 py-3 font-primary text-xs tracking-wider uppercase transition ${
+                    paymentMethod === "paystack"
+                      ? "border-gold bg-gold text-black"
+                      : "border-gold/50 text-gold hover:border-gold hover:bg-gold/10"
+                  }`}
+                >
+                  Paystack
                 </button>
               </div>
             </div>
