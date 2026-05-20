@@ -31,7 +31,7 @@ export default function WorshipSchool() {
   return (
     <div>
       <PageHeader
-        title="Worship School Academy"
+        title="Worship School"
         action={
           <Link to="/worship-school/new">
             <Button>New class</Button>

@@ -5,7 +5,7 @@ export const navLinks = [
   { label: "About", path: "/about" },
   { label: "Books", path: "/books" },
   { label: "Events", path: "/events" },
-  { label: "Academy", path: "/worship-school" },
+  { label: "Worship School", path: "/worship-school" },
   { label: "Blog", path: "/blog" },
   { label: "Gallery", path: "/gallery" },
   { label: "Give", path: "/donate" },

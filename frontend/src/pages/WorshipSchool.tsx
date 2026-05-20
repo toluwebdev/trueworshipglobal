@@ -76,7 +76,7 @@ const WorshipSchool = () => {
         />
         <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-12 pt-32 md:px-10 md:pb-16 md:pt-36">
           <h1 className="font-primary text-sm tracking-[0.35em] uppercase md:text-base">
-            Worship School Academy
+            Worship School
           </h1>
           <p className="mt-4 max-w-2xl font-lato text-base leading-relaxed text-white/85 md:text-lg md:leading-relaxed">
             Intensive, spirit-led training to awaken worshippers, refine gifts, and deepen

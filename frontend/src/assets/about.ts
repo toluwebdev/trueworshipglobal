@@ -42,8 +42,8 @@ export const initiatives = [
 ] as const;
 
 export const mailingListCopy = {
-  lead: "I usually share things with you first before anyone else.",
-  sub: "Join my mailing list below so you don't miss out.",
+  lead: "We usually share things with you first before anyone else.",
+  sub: "Join Our mailing list below so you don't miss out.",
 } as const;
 
 export const contact = {
