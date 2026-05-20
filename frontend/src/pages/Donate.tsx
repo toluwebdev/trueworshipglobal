@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
+import { bankTransferDetails } from "../assets/donate";
 import {
   getPaystackPublicKey,
   startDonation,
@@ -9,6 +10,8 @@ import {
 } from "../lib/paystack";
 
 const PRESET_AMOUNTS = [1_000, 5_000, 10_000, 25_000, 50_000] as const;
+
+type PaymentMethod = "paystack" | "bank";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -19,12 +22,14 @@ const Donate = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const referenceParam = searchParams.get("reference");
 
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("paystack");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [amount, setAmount] = useState<number>(PRESET_AMOUNTS[0]);
   const [customAmount, setCustomAmount] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const [verifying, setVerifying] = useState(Boolean(referenceParam));
   const [paymentResult, setPaymentResult] = useState<DonationVerifyResponse | null>(
     null,
@@ -75,18 +80,25 @@ const Donate = () => {
     }
   };
 
+  const getFinalAmount = () => {
+    const finalAmount = customAmount
+      ? Number(customAmount.replace(/,/g, ""))
+      : amount;
+    return finalAmount;
+  };
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
+    if (paymentMethod === "bank") return;
+
     if (!paystackReady) {
-      setError("Donations are not configured yet. Please check back soon.");
+      setError("Paystack is not configured yet. Please use bank transfer below.");
       return;
     }
 
-    const finalAmount = customAmount
-      ? Number(customAmount.replace(/,/g, ""))
-      : amount;
+    const finalAmount = getFinalAmount();
 
     if (!Number.isFinite(finalAmount) || finalAmount < 100) {
       setError("Minimum donation is ₦100.");
@@ -108,11 +120,27 @@ const Donate = () => {
     }
   };
 
+  const copyAccountNumber = async () => {
+    try {
+      await navigator.clipboard.writeText(bankTransferDetails.accountNumber);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  };
+
   const clearResult = () => {
     setPaymentResult(null);
     setSearchParams({}, { replace: true });
     setError(null);
   };
+
+  const displayAmount = getFinalAmount();
+  const amountLabel =
+    Number.isFinite(displayAmount) && displayAmount >= 100
+      ? `₦${displayAmount.toLocaleString()}`
+      : null;
 
   return (
     <motion.div
@@ -178,18 +206,47 @@ const Donate = () => {
         )}
 
         {!paymentResult?.ok && (
-          <motion.form
+          <motion.div
             variants={fadeUp}
             initial="hidden"
             animate="visible"
-            onSubmit={onSubmit}
             className="space-y-8 rounded-sm border border-white/10 bg-surface/40 px-6 py-10 md:px-10"
           >
             <div>
               <p className="mb-4 font-primary text-xs tracking-[0.25em] text-white/70 uppercase">
+                How would you like to give?
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("paystack")}
+                  className={`border px-3 py-3 font-primary text-xs tracking-wider uppercase transition ${
+                    paymentMethod === "paystack"
+                      ? "border-gold bg-gold text-black"
+                      : "border-gold/50 text-gold hover:border-gold hover:bg-gold/10"
+                  }`}
+                >
+                  Paystack
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("bank")}
+                  className={`border px-3 py-3 font-primary text-xs tracking-wider uppercase transition ${
+                    paymentMethod === "bank"
+                      ? "border-gold bg-gold text-black"
+                      : "border-gold/50 text-gold hover:border-gold hover:bg-gold/10"
+                  }`}
+                >
+                  Bank transfer
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-4 font-primary text-xs tracking-[0.25em] text-white/70 uppercase">
                 Select amount (NGN)
               </p>
-              <motion.div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {PRESET_AMOUNTS.map((preset) => {
                   const selected = !customAmount && amount === preset;
                   return (
@@ -207,7 +264,7 @@ const Donate = () => {
                     </button>
                   );
                 })}
-              </motion.div>
+              </div>
               <label className="mt-4 block">
                 <span className="mb-2 block font-primary text-xs tracking-[0.2em] text-white/60 uppercase">
                   Or enter custom amount
@@ -224,58 +281,106 @@ const Donate = () => {
               </label>
             </div>
 
-            <label className="block">
-              <span className="mb-2 block font-primary text-xs tracking-[0.2em] text-white/70 uppercase">
-                Full name (optional)
-              </span>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                autoComplete="name"
-                className="w-full border border-white/20 bg-background px-4 py-3 font-lato text-white outline-none focus:border-gold"
-              />
-            </label>
+            {paymentMethod === "bank" ? (
+              <div className="space-y-5 border border-gold/30 bg-gold/5 px-5 py-6">
+                <p className="font-primary text-xs tracking-[0.25em] text-gold uppercase">
+                  Transfer to this account
+                </p>
+                <dl className="space-y-4 font-lato text-sm text-white/90">
+                  <div>
+                    <dt className="text-xs tracking-wide text-white/50 uppercase">
+                      Account name
+                    </dt>
+                    <dd className="mt-1 text-base">{bankTransferDetails.accountName}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs tracking-wide text-white/50 uppercase">
+                      Bank
+                    </dt>
+                    <dd className="mt-1 text-base">{bankTransferDetails.bankName}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs tracking-wide text-white/50 uppercase">
+                      Account number
+                    </dt>
+                    <dd className="mt-1 flex flex-wrap items-center gap-3">
+                      <span className="font-primary text-lg tracking-[0.2em] text-gold">
+                        {bankTransferDetails.accountNumber}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={copyAccountNumber}
+                        className="border border-gold/60 px-3 py-1.5 font-primary text-[10px] tracking-[0.2em] text-gold uppercase transition hover:border-gold hover:bg-gold/10"
+                      >
+                        {copied ? "Copied" : "Copy"}
+                      </button>
+                    </dd>
+                  </div>
+                </dl>
+                <p className="font-lato text-sm leading-relaxed text-white/70">
+                  {amountLabel
+                    ? `Please transfer ${amountLabel} to the account above.`
+                    : "Please transfer your chosen amount to the account above."}{" "}
+                  Use your full name as the payment narration so we can acknowledge your
+                  gift. Thank you for partnering with us.
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={onSubmit} className="space-y-8">
+                <label className="block">
+                  <span className="mb-2 block font-primary text-xs tracking-[0.2em] text-white/70 uppercase">
+                    Full name (optional)
+                  </span>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    autoComplete="name"
+                    className="w-full border border-white/20 bg-background px-4 py-3 font-lato text-white outline-none focus:border-gold"
+                  />
+                </label>
 
-            <label className="block">
-              <span className="mb-2 block font-primary text-xs tracking-[0.2em] text-white/70 uppercase">
-                Email address
-              </span>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
-                className="w-full border border-white/20 bg-background px-4 py-3 font-lato text-white outline-none focus:border-gold"
-              />
-            </label>
+                <label className="block">
+                  <span className="mb-2 block font-primary text-xs tracking-[0.2em] text-white/70 uppercase">
+                    Email address
+                  </span>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
+                    className="w-full border border-white/20 bg-background px-4 py-3 font-lato text-white outline-none focus:border-gold"
+                  />
+                </label>
 
-            {error && (
-              <p className="font-lato text-sm text-red-400" role="alert">
-                {error}
-              </p>
+                {error && (
+                  <p className="font-lato text-sm text-red-400" role="alert">
+                    {error}
+                  </p>
+                )}
+
+                {!paystackReady && !error && (
+                  <p className="font-lato text-sm text-white/50">
+                    Paystack is not connected yet. Please use bank transfer instead.
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={submitting || verifying || !paystackReady}
+                  className="w-full border border-gold bg-gold px-6 py-3.5 font-primary text-sm tracking-[0.25em] text-black uppercase transition hover:bg-gold-dark disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {submitting ? "Opening checkout…" : "Donate with Paystack"}
+                </button>
+
+                <p className="text-center font-lato text-xs leading-relaxed text-white/45">
+                  Secure payment by Paystack. You can pay with card, bank transfer, or
+                  USSD where available.
+                </p>
+              </form>
             )}
-
-            {!paystackReady && !error && (
-              <p className="font-lato text-sm text-white/50">
-                Online giving will be available once Paystack is connected.
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={submitting || verifying || !paystackReady}
-              className="w-full border border-gold bg-gold px-6 py-3.5 font-primary text-sm tracking-[0.25em] text-black uppercase transition hover:bg-gold-dark disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {submitting ? "Opening checkout…" : "Donate with Paystack"}
-            </button>
-
-            <p className="text-center font-lato text-xs leading-relaxed text-white/45">
-              Secure payment by Paystack. You can pay with card, bank transfer, or
-              USSD where available.
-            </p>
-          </motion.form>
+          </motion.div>
         )}
       </div>
     </motion.div>
