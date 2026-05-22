@@ -6,6 +6,32 @@ export type OgBlogPost = {
   imageUrl: string;
 };
 
+export type OgEvent = {
+  _id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  date: string;
+  time: string;
+  location: string;
+  slug?: string;
+};
+
+export type OgWorshipClass = OgEvent;
+
+export type OgReq = {
+  method?: string;
+  query?: Record<string, string | undefined>;
+  headers?: { host?: string; "x-forwarded-proto"?: string };
+};
+
+export type OgRes = {
+  status: (code: number) => {
+    setHeader: (key: string, value: string) => void;
+    send: (body: string) => void;
+  };
+};
+
 const DEFAULT_API = "https://trueworshipglobal-server.vercel.app";
 const DEFAULT_SITE = "https://trueworshipglobal.vercel.app";
 
@@ -88,12 +114,46 @@ export async function fetchPublishedBlog(id: string): Promise<OgBlogPost | null>
   return res.json() as Promise<OgBlogPost>;
 }
 
+export async function fetchEvent(slug: string): Promise<OgEvent | null> {
+  const res = await fetch(`${getApiBase()}/api/events/${encodeURIComponent(slug)}`, {
+    headers: { Accept: "application/json" },
+  });
+  if (!res.ok) return null;
+  return res.json() as Promise<OgEvent>;
+}
+
+export async function fetchWorshipClass(slug: string): Promise<OgWorshipClass | null> {
+  const res = await fetch(
+    `${getApiBase()}/api/worship-school/${encodeURIComponent(slug)}`,
+    { headers: { Accept: "application/json" } },
+  );
+  if (!res.ok) return null;
+  return res.json() as Promise<OgWorshipClass>;
+}
+
+export function formatEventDescription(event: OgEvent): string {
+  const body = excerpt(event.description, 140);
+  const d = new Date(event.date);
+  const dateLabel = Number.isNaN(d.getTime())
+    ? ""
+    : d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  const meta = [dateLabel, event.time, event.location].filter(Boolean).join(" · ");
+  if (body && meta) return `${meta} — ${body}`;
+  return body || meta || "True Worship Global event";
+}
+
+export function formatClassDescription(item: OgWorshipClass): string {
+  return formatEventDescription(item);
+}
+
 export function buildOgHtml(options: {
   title: string;
   description: string;
   image: string;
   url: string;
   siteName?: string;
+  ogType?: "article" | "website";
+  ctaLabel?: string;
 }): string {
   const title = escapeHtml(options.title);
   const description = escapeHtml(options.description);
@@ -101,6 +161,8 @@ export function buildOgHtml(options: {
   const url = escapeAttrUrl(options.url);
   const siteName = escapeHtml(options.siteName ?? "True Worship Global");
   const imageAlt = title;
+  const ogType = options.ogType ?? "article";
+  const ctaLabel = escapeHtml(options.ctaLabel ?? "View on True Worship Global");
 
   return `<!DOCTYPE html>
 <html lang="en" prefix="og: https://ogp.me/ns#">
@@ -111,7 +173,7 @@ export function buildOgHtml(options: {
   <meta name="description" content="${description}" />
   <link rel="canonical" href="${url}" />
   <link rel="image_src" href="${image}" />
-  <meta property="og:type" content="article" />
+  <meta property="og:type" content="${ogType}" />
   <meta property="og:site_name" content="${siteName}" />
   <meta property="og:locale" content="en_US" />
   <meta property="og:title" content="${title}" />
@@ -133,7 +195,71 @@ export function buildOgHtml(options: {
   <img src="${image}" alt="${imageAlt}" width="1200" height="630" />
   <h1>${title}</h1>
   <p>${description}</p>
-  <p><a href="${url}">Read on ${siteName}</a></p>
+  <p><a href="${url}">${ctaLabel}</a></p>
 </body>
 </html>`;
+}
+
+export async function sendOgResponse<T extends { title: string; imageUrl: string }>(
+  req: OgReq,
+  res: OgRes,
+  options: {
+    slugParam: string;
+    pagePathPrefix: string;
+    fetchItem: (slug: string) => Promise<T | null>;
+    getTitle: (item: T) => string;
+    getDescription: (item: T) => string;
+    notFoundTitle: string;
+    notFoundDescription: string;
+    ctaLabel?: string;
+    logTag: string;
+  },
+): Promise<void> {
+  if (req.method !== "GET") {
+    res.status(405).setHeader("Content-Type", "text/plain").send("Method not allowed");
+    return;
+  }
+
+  const slug = req.query?.[options.slugParam];
+  if (!slug || typeof slug !== "string") {
+    res.status(400).setHeader("Content-Type", "text/plain").send("Missing slug");
+    return;
+  }
+
+  const siteOrigin = getSiteOrigin(req);
+  const pageUrl = `${siteOrigin}${options.pagePathPrefix}/${encodeURIComponent(slug)}`;
+
+  try {
+    const item = await options.fetchItem(slug);
+
+    if (!item) {
+      const html = buildOgHtml({
+        title: options.notFoundTitle,
+        description: options.notFoundDescription,
+        image: absoluteImageUrl("", siteOrigin),
+        url: pageUrl,
+        ogType: "website",
+      });
+      res.status(404).setHeader("Content-Type", "text/html; charset=utf-8").send(html);
+      return;
+    }
+
+    const html = buildOgHtml({
+      title: options.getTitle(item),
+      description: options.getDescription(item),
+      image: absoluteImageUrl(item.imageUrl, siteOrigin),
+      url: pageUrl,
+      ogType: "website",
+      ctaLabel: options.ctaLabel,
+    });
+
+    res
+      .status(200)
+      .setHeader("Content-Type", "text/html; charset=utf-8")
+      .setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate=86400")
+      .send(html);
+  } catch (err) {
+    console.error(`[${options.logTag}]`, err);
+    res.status(500).setHeader("Content-Type", "text/plain").send("Failed to build preview");
+  }
 }

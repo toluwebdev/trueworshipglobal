@@ -14,22 +14,7 @@ import {
   formatBlogDate,
   type ApiBlog,
 } from "../lib/api";
-
-function toAbsoluteImage(imageUrl: string): string {
-  if (!imageUrl?.trim()) return `${window.location.origin}/android-chrome-512x512.png`;
-  const trimmed = imageUrl.trim();
-  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-    if (trimmed.includes("res.cloudinary.com") && trimmed.includes("/upload/")) {
-      const parts = trimmed.split("/upload/");
-      if (parts.length === 2) {
-        return `${parts[0]}/upload/c_fill,g_auto,w_1200,h_630,f_jpg,q_auto/${parts[1]}`;
-      }
-    }
-    return trimmed;
-  }
-  const path = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
-  return `${window.location.origin}${path}`;
-}
+import { toAbsoluteImage } from "../lib/ogImage";
 
 const BlogPost = () => {
   const { postId } = useParams<{ postId: string }>();

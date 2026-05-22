@@ -5,7 +5,16 @@ import DetailEndedBar from "../components/DetailEndedBar";
 import DetailRegisterBar from "../components/DetailRegisterBar";
 import InViewSection from "../components/InViewSection";
 import { InViewItem, InViewStagger } from "../components/InViewStagger";
-import { cmsApi, eventSubtitle, getEventPath, getEventSlug, isEventUpcoming, type ApiEvent } from "../lib/api";
+import { usePageMeta } from "../hooks/usePageMeta";
+import {
+  cmsApi,
+  eventSubtitle,
+  getEventPath,
+  getEventSlug,
+  isEventUpcoming,
+  type ApiEvent,
+} from "../lib/api";
+import { toAbsoluteImage } from "../lib/ogImage";
 
 const EventDetail = () => {
   const { eventSlug } = useParams<{ eventSlug: string }>();
@@ -41,6 +50,17 @@ const EventDetail = () => {
       navigate(getEventPath(event), { replace: true });
     }
   }, [event, eventSlug, navigate]);
+
+  usePageMeta({
+    title: event ? `${event.title} — True Worship Global` : undefined,
+    description: event
+      ? `${eventSubtitle(event)} — ${event.description.replace(/\s+/g, " ").trim().slice(0, 140)}`
+      : undefined,
+    image: event ? toAbsoluteImage(event.imageUrl) : undefined,
+    url: event
+      ? `${typeof window !== "undefined" ? window.location.origin : ""}${getEventPath(event)}`
+      : undefined,
+  });
 
   if (!eventSlug) {
     return <Navigate to="/events" replace />;

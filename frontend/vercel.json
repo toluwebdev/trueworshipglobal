@@ -17,6 +17,28 @@
       "destination": "/api/og/blog/:id"
     },
     {
+      "source": "/events/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|Facebot|WhatsApp|Twitterbot|LinkedInBot|Slackbot|Discordbot|Telegram|Pinterest|Googlebot|bingbot|Embedly|Applebot|vkShare|redditbot|preview|bot|crawler|spider).*"
+        }
+      ],
+      "destination": "/api/og/event/:slug"
+    },
+    {
+      "source": "/worship-school/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|Facebot|WhatsApp|Twitterbot|LinkedInBot|Slackbot|Discordbot|Telegram|Pinterest|Googlebot|bingbot|Embedly|Applebot|vkShare|redditbot|preview|bot|crawler|spider).*"
+        }
+      ],
+      "destination": "/api/og/worship-school/:slug"
+    },
+    {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }

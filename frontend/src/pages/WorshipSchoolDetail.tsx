@@ -5,6 +5,7 @@ import DetailEndedBar from "../components/DetailEndedBar";
 import DetailRegisterBar from "../components/DetailRegisterBar";
 import InViewSection from "../components/InViewSection";
 import { InViewItem, InViewStagger } from "../components/InViewStagger";
+import { usePageMeta } from "../hooks/usePageMeta";
 import {
   classSubtitle,
   cmsApi,
@@ -13,6 +14,7 @@ import {
   isClassUpcoming,
   type ApiWorshipClass,
 } from "../lib/api";
+import { toAbsoluteImage } from "../lib/ogImage";
 
 const WorshipSchoolDetail = () => {
   const { classSlug } = useParams<{ classSlug: string }>();
@@ -48,6 +50,17 @@ const WorshipSchoolDetail = () => {
       navigate(getWorshipClassPath(item), { replace: true });
     }
   }, [item, classSlug, navigate]);
+
+  usePageMeta({
+    title: item ? `${item.title} — Worship School` : undefined,
+    description: item
+      ? `${classSubtitle(item)} — ${item.description.replace(/\s+/g, " ").trim().slice(0, 140)}`
+      : undefined,
+    image: item ? toAbsoluteImage(item.imageUrl) : undefined,
+    url: item
+      ? `${typeof window !== "undefined" ? window.location.origin : ""}${getWorshipClassPath(item)}`
+      : undefined,
+  });
 
   if (!classSlug) {
     return <Navigate to="/worship-school" replace />;
