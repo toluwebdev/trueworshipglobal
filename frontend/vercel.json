@@ -1,10 +1,21 @@
 {
   "functions": {
     "api/**/*.ts": {
-      "includeFiles": "src/lib/**,src/assets/**"
+      "includeFiles": "api/_lib/**,src/lib/**,src/assets/**"
     }
   },
   "rewrites": [
+    {
+      "source": "/blog/:id",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|Facebot|WhatsApp|Twitterbot|LinkedInBot|Slackbot|Discordbot|TelegramBot|Pinterest|Googlebot|bingbot|Embedly|Applebot).*"
+        }
+      ],
+      "destination": "/api/og/blog/:id"
+    },
     {
       "source": "/((?!api/).*)",
       "destination": "/index.html"

@@ -5,12 +5,26 @@ import BlogEngagement from "../components/blog/BlogEngagement";
 import BlogRegisterCta from "../components/blog/BlogRegisterCta";
 import InViewSection from "../components/InViewSection";
 import { InViewItem, InViewStagger } from "../components/InViewStagger";
+import { usePageMeta } from "../hooks/usePageMeta";
+import { getPostShareUrl } from "../lib/blog";
 import {
+  blogExcerpt,
   cmsApi,
   contentParagraphs,
   formatBlogDate,
   type ApiBlog,
 } from "../lib/api";
+
+function toAbsoluteImage(imageUrl: string): string {
+  if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+    if (imageUrl.includes("res.cloudinary.com") && imageUrl.includes("/upload/")) {
+      return imageUrl.replace("/upload/", "/upload/w_1200,h_630,c_fill,q_auto,f_auto/");
+    }
+    return imageUrl;
+  }
+  const path = imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
+  return `${window.location.origin}${path}`;
+}
 
 const BlogPost = () => {
   const { postId } = useParams<{ postId: string }>();
@@ -37,6 +51,13 @@ const BlogPost = () => {
       cancelled = true;
     };
   }, [postId]);
+
+  usePageMeta({
+    title: post ? `${post.title} — True Worship Global` : undefined,
+    description: post ? blogExcerpt(post.content) || post.genre : undefined,
+    image: post ? toAbsoluteImage(post.imageUrl) : undefined,
+    url: post ? getPostShareUrl(post._id) : undefined,
+  });
 
   if (!postId) {
     return <Navigate to="/blog" replace />;
