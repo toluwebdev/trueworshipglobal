@@ -11,7 +11,7 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": "(?i).*(facebookexternalhit|Facebot|WhatsApp|Twitterbot|LinkedInBot|Slackbot|Discordbot|TelegramBot|Pinterest|Googlebot|bingbot|Embedly|Applebot).*"
+          "value": "(?i).*(facebookexternalhit|Facebot|WhatsApp|Twitterbot|LinkedInBot|Slackbot|Discordbot|Telegram|Pinterest|Googlebot|bingbot|Embedly|Applebot|vkShare|redditbot|preview|bot|crawler|spider).*"
         }
       ],
       "destination": "/api/og/blog/:id"

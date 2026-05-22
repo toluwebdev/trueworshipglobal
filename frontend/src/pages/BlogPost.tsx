@@ -16,13 +16,18 @@ import {
 } from "../lib/api";
 
 function toAbsoluteImage(imageUrl: string): string {
-  if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
-    if (imageUrl.includes("res.cloudinary.com") && imageUrl.includes("/upload/")) {
-      return imageUrl.replace("/upload/", "/upload/w_1200,h_630,c_fill,q_auto,f_auto/");
+  if (!imageUrl?.trim()) return `${window.location.origin}/android-chrome-512x512.png`;
+  const trimmed = imageUrl.trim();
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    if (trimmed.includes("res.cloudinary.com") && trimmed.includes("/upload/")) {
+      const parts = trimmed.split("/upload/");
+      if (parts.length === 2) {
+        return `${parts[0]}/upload/c_fill,g_auto,w_1200,h_630,f_jpg,q_auto/${parts[1]}`;
+      }
     }
-    return imageUrl;
+    return trimmed;
   }
-  const path = imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
+  const path = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
   return `${window.location.origin}${path}`;
 }
 

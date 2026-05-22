@@ -57,7 +57,6 @@ export default async function handler(req: Req, res: Res) {
       description,
       image,
       url: pageUrl,
-      redirectUrl: pageUrl,
     });
 
     res

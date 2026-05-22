@@ -40,6 +40,7 @@ export function usePageMeta(meta: PageMeta) {
     }
     if (meta.image) {
       upsertMeta("property", "og:image", meta.image);
+      upsertMeta("property", "og:image:secure_url", meta.image);
       upsertMeta("name", "twitter:image", meta.image);
       upsertMeta("name", "twitter:card", "summary_large_image");
     }
