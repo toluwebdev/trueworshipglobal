@@ -3,7 +3,7 @@ import { addComment, adjustLikes, getEngagement } from "../../server/blog-store"
 type Req = {
   method?: string;
   query?: { postId?: string };
-  body?: { action?: string; name?: string; text?: string; delta?: number };
+  body?: { action?: string; name?: string; email?: string; text?: string; delta?: number };
 };
 
 type Res = {
@@ -49,16 +49,20 @@ export default async function handler(req: Req, res: Res) {
 
     if (body.action === "comment") {
       const name = body.name?.trim() ?? "";
+      const email = body.email?.trim() ?? "";
       const text = body.text?.trim() ?? "";
 
       if (name.length < 2 || name.length > 60) {
         return res.status(400).json({ error: "Name must be 2–60 characters" });
       }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({ error: "Please enter a valid email address" });
+      }
       if (text.length < 3 || text.length > 1000) {
         return res.status(400).json({ error: "Comment must be 3–1000 characters" });
       }
 
-      const engagement = await addComment(postId, name, text);
+      const engagement = await addComment(postId, name, email, text);
       return res.status(200).json(engagement);
     }
 

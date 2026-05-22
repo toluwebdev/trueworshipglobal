@@ -72,10 +72,15 @@ export async function handleBlogEngagementApi(
 
     if (body.action === "comment") {
       const name = body.name?.trim() ?? "";
+      const email = body.email?.trim() ?? "";
       const text = body.text?.trim() ?? "";
 
       if (name.length < 2 || name.length > 60) {
         sendJson(res, 400, { error: "Name must be 2–60 characters" });
+        return true;
+      }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        sendJson(res, 400, { error: "Please enter a valid email address" });
         return true;
       }
       if (text.length < 3 || text.length > 1000) {
@@ -83,7 +88,7 @@ export async function handleBlogEngagementApi(
         return true;
       }
 
-      const engagement = await addComment(postId, name, text);
+      const engagement = await addComment(postId, name, email, text);
       sendJson(res, 200, engagement);
       return true;
     }

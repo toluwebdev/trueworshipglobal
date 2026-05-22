@@ -24,7 +24,11 @@ const blogSchema = new mongoose.Schema({
     publishedAt:{
         type: Date,
         default: null
-    }
+    },
+    registerUrl: {
+        type: String,
+        default: "",
+    },
 },{timestamps: true});
 const Blog = mongoose.model("Blog", blogSchema);
 export default Blog;

@@ -4,6 +4,7 @@ import path from "node:path";
 export type BlogComment = {
   id: string;
   name: string;
+  email: string;
   text: string;
   createdAt: string;
 };
@@ -60,6 +61,7 @@ export async function getEngagement(postId: string): Promise<PostEngagement> {
 export async function addComment(
   postId: string,
   name: string,
+  email: string,
   text: string,
 ): Promise<PostEngagement> {
   const store = await readStore();
@@ -67,6 +69,7 @@ export async function addComment(
   const comment: BlogComment = {
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
     name: name.trim(),
+    email: email.trim(),
     text: text.trim(),
     createdAt: new Date().toISOString(),
   };

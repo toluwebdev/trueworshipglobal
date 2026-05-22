@@ -27,6 +27,7 @@ export type ApiBlog = {
   isPublished: boolean;
   publishedAt: string | null;
   createdAt: string;
+  registerUrl?: string;
 };
 
 export type ApiEvent = {

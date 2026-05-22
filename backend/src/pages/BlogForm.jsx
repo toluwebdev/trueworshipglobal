@@ -9,6 +9,7 @@ const empty = {
   title: "",
   genre: "",
   content: "",
+  registerUrl: "",
   isPublished: false,
 };
 
@@ -31,6 +32,7 @@ export default function BlogForm() {
           title: blog.title || "",
           genre: blog.genre || "",
           content: blog.content || "",
+          registerUrl: blog.registerUrl || "",
           isPublished: Boolean(blog.isPublished),
         });
       })
@@ -88,6 +90,14 @@ export default function BlogForm() {
           onChange={onChange}
           rows={12}
           required
+        />
+        <Input
+          label="Register URL (optional)"
+          name="registerUrl"
+          type="url"
+          value={form.registerUrl}
+          onChange={onChange}
+          placeholder="https://…"
         />
         <label className="flex items-center gap-2 text-sm text-white/80">
           <input

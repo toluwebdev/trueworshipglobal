@@ -25,6 +25,7 @@ const BlogEngagement = ({ postId, postTitle }: BlogEngagementProps) => {
   const [commentError, setCommentError] = useState<string | null>(null);
   const [shareNotice, setShareNotice] = useState<string | null>(null);
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [text, setText] = useState("");
 
   const shareUrl = getPostShareUrl(postId);
@@ -82,9 +83,10 @@ const BlogEngagement = ({ postId, postTitle }: BlogEngagementProps) => {
     setCommentError(null);
 
     try {
-      const data = await postCommentApi(postId, name, text);
+      const data = await postCommentApi(postId, name, email, text);
       setEngagement(data);
       setName("");
+      setEmail("");
       setText("");
     } catch (err) {
       setCommentError(err instanceof Error ? err.message : "Could not post comment");
@@ -173,6 +175,20 @@ const BlogEngagement = ({ postId, postTitle }: BlogEngagementProps) => {
             required
             maxLength={60}
             placeholder="Your name"
+            className="w-full border border-white/35 bg-transparent px-4 py-3 font-lato text-sm text-white placeholder:text-white/50 focus:border-white focus:outline-none"
+          />
+        </label>
+        <label className="block">
+          <span className="sr-only">Email</span>
+          <input
+            type="email"
+            name="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            maxLength={120}
+            autoComplete="email"
+            placeholder="Your email"
             className="w-full border border-white/35 bg-transparent px-4 py-3 font-lato text-sm text-white placeholder:text-white/50 focus:border-white focus:outline-none"
           />
         </label>

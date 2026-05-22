@@ -5,6 +5,18 @@ import Blog from "../../schema/BlogSchema.js";
 
 const router = Router();
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function mapComment(c) {
+  return {
+    id: c._id.toString(),
+    name: c.name,
+    email: c.email,
+    text: c.comment,
+    createdAt: c.createdAt,
+  };
+}
+
 router.get("/", async (_req, res) => {
   try {
     const blogs = await Blog.find({ isPublished: true }).sort({ publishedAt: -1 });
@@ -36,12 +48,7 @@ router.get("/:id/engagement", async (req, res) => {
 
     res.json({
       likes,
-      comments: comments.map((c) => ({
-        id: c._id.toString(),
-        name: c.name,
-        text: c.comment,
-        createdAt: c.createdAt,
-      })),
+      comments: comments.map(mapComment),
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -73,12 +80,7 @@ router.post("/:id/like", async (req, res) => {
     res.json({
       likes,
       liked: !existing,
-      comments: comments.map((c) => ({
-        id: c._id.toString(),
-        name: c.name,
-        text: c.comment,
-        createdAt: c.createdAt,
-      })),
+      comments: comments.map(mapComment),
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -87,9 +89,16 @@ router.post("/:id/like", async (req, res) => {
 
 router.post("/:id/comments", async (req, res) => {
   try {
-    const { name, comment } = req.body;
-    if (!name?.trim() || !comment?.trim()) {
-      return res.status(400).json({ error: "Name and comment are required" });
+    const { name, email, comment } = req.body;
+    const trimmedName = name?.trim() ?? "";
+    const trimmedEmail = email?.trim() ?? "";
+    const trimmedComment = comment?.trim() ?? "";
+
+    if (!trimmedName || !trimmedEmail || !trimmedComment) {
+      return res.status(400).json({ error: "Name, email, and comment are required" });
+    }
+    if (!EMAIL_RE.test(trimmedEmail)) {
+      return res.status(400).json({ error: "Please enter a valid email address" });
     }
 
     const blog = await Blog.findOne({ _id: req.params.id, isPublished: true });
@@ -97,8 +106,9 @@ router.post("/:id/comments", async (req, res) => {
 
     await Comment.create({
       blogId: blog._id,
-      name: name.trim().slice(0, 60),
-      comment: comment.trim().slice(0, 1000),
+      name: trimmedName.slice(0, 60),
+      email: trimmedEmail.slice(0, 120),
+      comment: trimmedComment.slice(0, 1000),
     });
 
     const [likes, comments] = await Promise.all([
@@ -108,12 +118,7 @@ router.post("/:id/comments", async (req, res) => {
 
     res.status(201).json({
       likes,
-      comments: comments.map((c) => ({
-        id: c._id.toString(),
-        name: c.name,
-        text: c.comment,
-        createdAt: c.createdAt,
-      })),
+      comments: comments.map(mapComment),
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

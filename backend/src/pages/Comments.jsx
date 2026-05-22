@@ -37,6 +37,9 @@ export default function Comments() {
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div>
                 <p className="font-medium">{item.name}</p>
+                {item.email && (
+                  <p className="mt-0.5 text-xs text-white/60">{item.email}</p>
+                )}
                 <p className="mt-1 text-xs text-white/50">
                   {item.blogId?.title ? `On: ${item.blogId.title}` : "Blog removed"} ·{" "}
                   {new Date(item.createdAt).toLocaleString()}

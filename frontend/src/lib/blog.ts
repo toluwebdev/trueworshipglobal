@@ -3,6 +3,7 @@ import { API_BASE } from "./env";
 export type BlogComment = {
   id: string;
   name: string;
+  email: string;
   text: string;
   createdAt: string;
 };
@@ -78,12 +79,13 @@ export async function toggleLikeApi(postId: string): Promise<PostEngagement> {
 export async function postCommentApi(
   postId: string,
   name: string,
+  email: string,
   text: string,
 ): Promise<PostEngagement> {
   const res = await fetch(`${API_BASE}/api/blogs/${encodeURIComponent(postId)}/comments`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, comment: text }),
+    body: JSON.stringify({ name, email, comment: text }),
   });
 
   const data = (await res.json().catch(() => ({}))) as PostEngagement & { error?: string };

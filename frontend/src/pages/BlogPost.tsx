@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import ArticleSkeleton from "../components/ArticleSkeleton";
 import BlogEngagement from "../components/blog/BlogEngagement";
+import BlogRegisterCta from "../components/blog/BlogRegisterCta";
 import InViewSection from "../components/InViewSection";
 import { InViewItem, InViewStagger } from "../components/InViewStagger";
 import {
@@ -84,6 +85,12 @@ const BlogPost = () => {
             </InViewItem>
           ))}
         </InViewStagger>
+
+        {post.registerUrl?.trim() ? (
+          <InViewSection as="div">
+            <BlogRegisterCta registerUrl={post.registerUrl.trim()} />
+          </InViewSection>
+        ) : null}
 
         <InViewSection as="div" className="mt-12">
           <BlogEngagement postId={post._id} postTitle={post.title} />
