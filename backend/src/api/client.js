@@ -93,6 +93,12 @@ export const api = {
 
   mailing: {
     list: () => request("/api/admin/mailing"),
+    status: () => request("/api/admin/mailing/status"),
+    send: (body) =>
+      request("/api/admin/mailing/send", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
     remove: (id) => request(`/api/admin/mailing/${id}`, { method: "DELETE" }),
   },
 
