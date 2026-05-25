@@ -78,6 +78,10 @@ function escapeHtml(text) {
     .replace(/"/g, "&quot;");
 }
 
+function escapeAttrUrl(url) {
+  return url.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+}
+
 export function buildUnsubscribeUrls(toEmail) {
   const apiBase = getPublicApiBase();
   const siteUrl = getSiteUrl();
@@ -91,7 +95,41 @@ export function buildUnsubscribeUrls(toEmail) {
   return { oneClick, webPage, encoded };
 }
 
-export function buildNewsletterPlainText({ subject, message, siteUrl, toEmail, fromEmail }) {
+function emailImageUrl(url) {
+  const trimmed = url.trim();
+  if (trimmed.includes("res.cloudinary.com") && trimmed.includes("/upload/")) {
+    const parts = trimmed.split("/upload/");
+    if (parts.length === 2) {
+      return `${parts[0]}/upload/w_560,c_limit,f_auto,q_auto/${parts[1]}`;
+    }
+  }
+  return trimmed;
+}
+
+function buildImagesHtml(images = []) {
+  const safe = images.filter((u) => typeof u === "string" && u.startsWith("https://"));
+  if (safe.length === 0) return "";
+
+  return safe
+    .map((url) => {
+      const src = escapeAttrUrl(emailImageUrl(url));
+      return `<tr>
+            <td style="padding:0 28px 16px;">
+              <img src="${src}" alt="" width="504" style="display:block;max-width:100%;height:auto;border-radius:4px;" />
+            </td>
+          </tr>`;
+    })
+    .join("");
+}
+
+export function buildNewsletterPlainText({
+  subject,
+  message,
+  siteUrl,
+  toEmail,
+  fromEmail,
+  images = [],
+}) {
   const { webPage, oneClick } = buildUnsubscribeUrls(toEmail);
   const origin = siteUrl || getSiteUrl() || "https://trueworshipglobal.com";
   const lines = [
@@ -101,9 +139,14 @@ export function buildNewsletterPlainText({ subject, message, siteUrl, toEmail, f
     "",
     message,
     "",
-    "---",
-    `You subscribed at ${origin}.`,
   ];
+  const safeImages = images.filter((u) => typeof u === "string" && u.startsWith("https://"));
+  if (safeImages.length > 0) {
+    lines.push("Images:");
+    safeImages.forEach((url) => lines.push(url));
+    lines.push("");
+  }
+  lines.push("---", `You subscribed at ${origin}.`);
   if (webPage) {
     lines.push(`Unsubscribe: ${webPage}`);
   }
@@ -114,9 +157,17 @@ export function buildNewsletterPlainText({ subject, message, siteUrl, toEmail, f
   return lines.join("\n");
 }
 
-export function buildNewsletterHtml({ subject, message, siteUrl, toEmail, fromEmail }) {
+export function buildNewsletterHtml({
+  subject,
+  message,
+  siteUrl,
+  toEmail,
+  fromEmail,
+  images = [],
+}) {
   const safeSubject = escapeHtml(subject);
   const bodyHtml = escapeHtml(message).replace(/\n/g, "<br />");
+  const imagesHtml = buildImagesHtml(images);
   const origin = siteUrl || getSiteUrl() || "https://trueworshipglobal.com";
   const { webPage } = buildUnsubscribeUrls(toEmail);
   const safeFrom = escapeHtml(fromEmail);
@@ -148,6 +199,7 @@ export function buildNewsletterHtml({ subject, message, siteUrl, toEmail, fromEm
               ${bodyHtml}
             </td>
           </tr>
+          ${imagesHtml}
           <tr>
             <td style="padding:0 28px 24px;font-size:14px;line-height:1.5;">
               <a href="${origin}" style="color:#8a7340;">Visit our website</a>
@@ -188,16 +240,18 @@ function buildListHeaders(toEmail, fromEmail) {
   return headers;
 }
 
-export async function sendNewsletterEmail({ to, subject, message, siteUrl }) {
+export async function sendNewsletterEmail({ to, subject, message, siteUrl, images = [] }) {
   const { fromEmail, fromName, user } = getMailConfig();
   const transport = getTransporter();
   const origin = siteUrl || getSiteUrl();
+  const safeImages = images.filter((u) => typeof u === "string" && u.startsWith("https://"));
   const html = buildNewsletterHtml({
     subject,
     message,
     siteUrl: origin,
     toEmail: to,
     fromEmail,
+    images: safeImages,
   });
   const text = buildNewsletterPlainText({
     subject,
@@ -205,6 +259,7 @@ export async function sendNewsletterEmail({ to, subject, message, siteUrl }) {
     siteUrl: origin,
     toEmail: to,
     fromEmail,
+    images: safeImages,
   });
   const headers = buildListHeaders(to, fromEmail);
   const domain = getFromDomain(fromEmail);

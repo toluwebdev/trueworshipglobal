@@ -12,6 +12,7 @@ const FOLDERS = {
   blogs: "trueworshipglobal/blogs",
   events: "trueworshipglobal/events",
   "worship-school": "trueworshipglobal/worship-school",
+  mailing: "trueworshipglobal/mailing",
 };
 
 const upload = multer({
@@ -54,7 +55,9 @@ router.post("/", upload.single("image"), async (req, res) => {
         ? "events"
         : req.body.type === "worship-school"
           ? "worship-school"
-          : "blogs";
+          : req.body.type === "mailing"
+            ? "mailing"
+            : "blogs";
     const folder = FOLDERS[type];
 
     const result = await uploadBuffer(req.file.buffer, folder);

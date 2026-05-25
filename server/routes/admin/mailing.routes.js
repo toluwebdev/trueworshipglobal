@@ -39,12 +39,20 @@ router.post("/send", async (req, res) => {
     const subject = String(req.body?.subject ?? "").trim();
     const message = String(req.body?.message ?? "").trim();
     const testEmail = String(req.body?.testEmail ?? "").trim().toLowerCase();
+    const images = Array.isArray(req.body?.images)
+      ? req.body.images
+          .filter((u) => typeof u === "string" && u.startsWith("https://"))
+          .slice(0, 10)
+      : [];
 
     if (!subject || subject.length > 200) {
       return res.status(400).json({ error: "Subject is required (max 200 characters)." });
     }
-    if (!message || message.length > 20000) {
-      return res.status(400).json({ error: "Message is required (max 20,000 characters)." });
+    if (!message && images.length === 0) {
+      return res.status(400).json({ error: "Add a message or at least one image." });
+    }
+    if (message.length > 20000) {
+      return res.status(400).json({ error: "Message is too long (max 20,000 characters)." });
     }
 
     const siteUrl = getSiteUrl();
@@ -53,7 +61,7 @@ router.post("/send", async (req, res) => {
       if (!EMAIL_RE.test(testEmail)) {
         return res.status(400).json({ error: "Invalid test email address." });
       }
-      await sendNewsletterEmail({ to: testEmail, subject, message, siteUrl });
+      await sendNewsletterEmail({ to: testEmail, subject, message, siteUrl, images });
       return res.json({
         ok: true,
         test: true,
@@ -78,6 +86,7 @@ router.post("/send", async (req, res) => {
           subject,
           message,
           siteUrl,
+          images,
         });
         sent += 1;
       } catch (err) {
