@@ -1,18 +1,11 @@
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { api } from "../api/client";
 import { Button, ErrorMessage, Input, Textarea } from "./ui";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function parseExtraEmailsInput(input) {
-  return [
-    ...new Set(
-      String(input)
-        .split(/[\s,;]+/)
-        .map((entry) => entry.trim().toLowerCase())
-        .filter((entry) => EMAIL_RE.test(entry)),
-    ),
-  ];
+function normalizeEmail(value) {
+  return String(value ?? "").trim().toLowerCase();
 }
 
 export default function SendEmailModal({
@@ -24,7 +17,10 @@ export default function SendEmailModal({
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [testEmail, setTestEmail] = useState("");
-  const [extraEmailsInput, setExtraEmailsInput] = useState("");
+  const [includeMailingList, setIncludeMailingList] = useState(true);
+  const [newEmail, setNewEmail] = useState("");
+  const [newName, setNewName] = useState("");
+  const [additionalRecipients, setAdditionalRecipients] = useState([]);
   const [images, setImages] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [sending, setSending] = useState(false);
@@ -32,16 +28,39 @@ export default function SendEmailModal({
   const [sendResult, setSendResult] = useState(null);
   const fileInputRef = useRef(null);
 
-  if (!open) return null;
+  const listEmails = [
+    ...new Set(
+      subscriberEmails
+        .map(normalizeEmail)
+        .filter((email) => EMAIL_RE.test(email)),
+    ),
+  ];
 
-  const resetAndClose = () => {
+  const listSet = new Set(listEmails);
+  const uniqueAdditional = additionalRecipients.filter(
+    (entry, index, arr) =>
+      arr.findIndex((item) => item.email === entry.email) === index,
+  );
+
+  const listCount = includeMailingList ? listEmails.length : 0;
+  const extraOnly = uniqueAdditional.filter((entry) => !listSet.has(entry.email));
+  const recipientCount = listCount + extraOnly.length;
+
+  const resetForm = () => {
     setSubject("");
     setMessage("");
     setTestEmail("");
-    setExtraEmailsInput("");
+    setIncludeMailingList(true);
+    setNewEmail("");
+    setNewName("");
+    setAdditionalRecipients([]);
     setImages([]);
     setError("");
     setSendResult(null);
+  };
+
+  const resetAndClose = () => {
+    resetForm();
     onClose();
   };
 
@@ -75,25 +94,26 @@ export default function SendEmailModal({
     setImages((prev) => prev.filter((item) => item !== url));
   };
 
-  const listEmails = useMemo(
-    () =>
-      [
-        ...new Set(
-          subscriberEmails
-            .map((entry) => String(entry).trim().toLowerCase())
-            .filter((entry) => EMAIL_RE.test(entry)),
-        ),
-      ],
-    [subscriberEmails],
-  );
+  const addRecipient = () => {
+    const email = normalizeEmail(newEmail);
+    if (!EMAIL_RE.test(email)) {
+      setError("Enter a valid email address.");
+      return;
+    }
+    if (additionalRecipients.some((entry) => entry.email === email)) {
+      setError("That email is already added.");
+      return;
+    }
+    const name = newName.trim();
+    setAdditionalRecipients((prev) => [...prev, { email, name: name || undefined }]);
+    setNewEmail("");
+    setNewName("");
+    setError("");
+  };
 
-  const extraEmails = useMemo(() => {
-    const parsed = parseExtraEmailsInput(extraEmailsInput);
-    const listSet = new Set(listEmails);
-    return parsed.filter((email) => !listSet.has(email));
-  }, [extraEmailsInput, listEmails]);
-
-  const recipientCount = listEmails.length + extraEmails.length;
+  const removeRecipient = (email) => {
+    setAdditionalRecipients((prev) => prev.filter((entry) => entry.email !== email));
+  };
 
   const onSend = async (options = {}) => {
     const isTest = Boolean(options.test);
@@ -110,18 +130,15 @@ export default function SendEmailModal({
       return;
     }
     if (!isTest && recipientCount === 0) {
-      setError("Add subscribers to the list or enter at least one additional email.");
+      setError("Turn on the mailing list and/or add at least one other recipient.");
       return;
     }
+
     if (!isTest) {
       const parts = [];
-      if (listEmails.length > 0) {
-        parts.push(`${listEmails.length} on the mailing list`);
-      }
-      if (extraEmails.length > 0) {
-        parts.push(`${extraEmails.length} additional`);
-      }
-      if (!confirm(`Send this email to ${parts.join(" + ")} (${recipientCount} total)?`)) {
+      if (listCount > 0) parts.push(`${listCount} from mailing list`);
+      if (extraOnly.length > 0) parts.push(`${extraOnly.length} other`);
+      if (!confirm(`Send to ${parts.join(" + ")} (${recipientCount} total)?`)) {
         return;
       }
     }
@@ -134,8 +151,14 @@ export default function SendEmailModal({
         subject: subject.trim(),
         message: message.trim(),
         images,
-        testEmail: isTest ? testEmail.trim() : undefined,
-        extraEmails: isTest ? undefined : extraEmails,
+        testEmail: isTest ? normalizeEmail(testEmail) : undefined,
+        includeMailingList: isTest ? true : includeMailingList,
+        extraRecipients: isTest
+          ? []
+          : extraOnly.map((entry) => ({
+              email: entry.email,
+              name: entry.name,
+            })),
       });
       setSendResult(result);
       if (!isTest && result.failed === 0) {
@@ -147,6 +170,8 @@ export default function SendEmailModal({
       setSending(false);
     }
   };
+
+  if (!open) return null;
 
   return (
     <div
@@ -192,9 +217,8 @@ export default function SendEmailModal({
             label="Message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            rows={8}
+            rows={6}
             disabled={sending || uploading}
-            placeholder="Write like a personal note (e.g. “Hi, we wanted to share…”). Avoid words like “sale” or “offer”."
           />
 
           <div>
@@ -235,27 +259,106 @@ export default function SendEmailModal({
             )}
           </div>
 
-          <Textarea
-            label="Additional recipients (optional)"
-            value={extraEmailsInput}
-            onChange={(e) => setExtraEmailsInput(e.target.value)}
-            rows={3}
-            disabled={sending || uploading}
-            placeholder="People not on the list — one email per line, or separated by commas"
-          />
-          {extraEmails.length > 0 && (
-            <p className="-mt-2 text-xs text-white/50">
-              {extraEmails.length} additional address{extraEmails.length === 1 ? "" : "es"} will
-              receive this send.
+          <div className="rounded border border-white/15 p-4">
+            <p className="mb-3 text-sm font-medium text-white">Who receives this?</p>
+
+            <label className="mb-4 flex cursor-pointer items-center gap-3 text-sm text-white/90">
+              <input
+                type="checkbox"
+                checked={includeMailingList}
+                onChange={(e) => setIncludeMailingList(e.target.checked)}
+                disabled={sending || listEmails.length === 0}
+                className="h-4 w-4 accent-amber-600"
+              />
+              <span>
+                Mailing list ({listEmails.length})
+                {listEmails.length === 0 && (
+                  <span className="text-white/50"> — no subscribers yet</span>
+                )}
+              </span>
+            </label>
+
+            <p className="mb-2 text-xs tracking-wide text-white/60 uppercase">
+              Other people (not on the list)
             </p>
-          )}
+            <div className="flex flex-wrap gap-2">
+              <Input
+                label="Email"
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                disabled={sending}
+                className="min-w-[140px] flex-1"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addRecipient();
+                  }
+                }}
+              />
+              <Input
+                label="Name (optional)"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                disabled={sending}
+                className="min-w-[120px] flex-1"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addRecipient();
+                  }
+                }}
+              />
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              className="mt-2"
+              disabled={sending || !newEmail.trim()}
+              onClick={addRecipient}
+            >
+              Add recipient
+            </Button>
+
+            {uniqueAdditional.length > 0 && (
+              <ul className="mt-4 space-y-2">
+                {uniqueAdditional.map((entry) => (
+                  <li
+                    key={entry.email}
+                    className="flex items-center justify-between gap-2 rounded border border-white/10 bg-white/5 px-3 py-2 text-sm"
+                  >
+                    <span>
+                      {entry.name ? (
+                        <>
+                          <span className="font-medium">{entry.name}</span>
+                          <span className="text-white/50"> · {entry.email}</span>
+                        </>
+                      ) : (
+                        entry.email
+                      )}
+                      {listSet.has(entry.email) && includeMailingList && (
+                        <span className="ml-2 text-xs text-amber-300/90">(on list — won’t duplicate)</span>
+                      )}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeRecipient(entry.email)}
+                      className="shrink-0 text-xs text-white/50 hover:text-white"
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
           <Input
             label="Test email"
             type="email"
             value={testEmail}
             onChange={(e) => setTestEmail(e.target.value)}
-            placeholder="Send a test first (optional)"
+            placeholder="Optional — send one test first"
             disabled={sending || uploading}
           />
         </div>
@@ -273,7 +376,7 @@ export default function SendEmailModal({
             disabled={sending || uploading || mailConfigured === false || recipientCount === 0}
             onClick={() => onSend({ test: false })}
           >
-            Send to all ({recipientCount})
+            Send ({recipientCount})
           </Button>
           <Button type="button" variant="ghost" onClick={resetAndClose} disabled={sending}>
             Cancel

@@ -10,45 +10,68 @@ const router = Router();
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SEND_DELAY_MS = 250;
-const MAX_EXTRA_EMAILS = 50;
+const MAX_EXTRA_RECIPIENTS = 50;
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function parseExtraEmails(body) {
-  const raw = body?.extraEmails;
-  const list = Array.isArray(raw)
-    ? raw
-    : typeof raw === "string"
-      ? raw.split(/[\s,;]+/)
-      : [];
-  return [
-    ...new Set(
-      list
-        .map((entry) => String(entry).trim().toLowerCase())
-        .filter((entry) => EMAIL_RE.test(entry)),
-    ),
-  ].slice(0, MAX_EXTRA_EMAILS);
+function normalizeEmail(value) {
+  return String(value ?? "").trim().toLowerCase();
 }
 
-function buildRecipientList(subscribers, extraEmails) {
+function parseExtraRecipients(body) {
+  const raw = body?.extraRecipients ?? body?.extraEmails;
+  const items = Array.isArray(raw) ? raw : typeof raw === "string" ? raw.split(/[\s,;]+/) : [];
+  const recipients = [];
+
+  for (const item of items) {
+    if (typeof item === "string") {
+      const email = normalizeEmail(item);
+      if (EMAIL_RE.test(email)) {
+        recipients.push({ email, name: undefined });
+      }
+      continue;
+    }
+    if (item && typeof item === "object" && typeof item.email === "string") {
+      const email = normalizeEmail(item.email);
+      const name = String(item.name ?? "").trim() || undefined;
+      if (EMAIL_RE.test(email)) {
+        recipients.push({ email, name });
+      }
+    }
+  }
+
+  const seen = new Set();
+  return recipients
+    .filter((entry) => {
+      if (seen.has(entry.email)) return false;
+      seen.add(entry.email);
+      return true;
+    })
+    .slice(0, MAX_EXTRA_RECIPIENTS);
+}
+
+function buildRecipientList(subscribers, extraRecipients, includeMailingList) {
   const recipients = [];
   const seen = new Set();
 
-  for (const subscriber of subscribers) {
-    const email = String(subscriber.email ?? "")
-      .trim()
-      .toLowerCase();
-    if (!EMAIL_RE.test(email) || seen.has(email)) continue;
-    seen.add(email);
-    recipients.push({ email, name: subscriber.name });
+  if (includeMailingList) {
+    for (const subscriber of subscribers) {
+      const email = normalizeEmail(subscriber.email);
+      if (!EMAIL_RE.test(email) || seen.has(email)) continue;
+      seen.add(email);
+      recipients.push({
+        email,
+        name: String(subscriber.name ?? "").trim() || undefined,
+      });
+    }
   }
 
-  for (const email of extraEmails) {
-    if (seen.has(email)) continue;
-    seen.add(email);
-    recipients.push({ email, name: undefined });
+  for (const extra of extraRecipients) {
+    if (seen.has(extra.email)) continue;
+    seen.add(extra.email);
+    recipients.push({ email: extra.email, name: extra.name });
   }
 
   return recipients;
@@ -77,7 +100,7 @@ router.post("/send", async (req, res) => {
 
     const subject = String(req.body?.subject ?? "").trim();
     const message = String(req.body?.message ?? "").trim();
-    const testEmail = String(req.body?.testEmail ?? "").trim().toLowerCase();
+    const testEmail = normalizeEmail(req.body?.testEmail);
     const images = Array.isArray(req.body?.images)
       ? req.body.images
           .filter((u) => typeof u === "string" && u.startsWith("https://"))
@@ -117,13 +140,14 @@ router.post("/send", async (req, res) => {
       });
     }
 
-    const extraEmails = parseExtraEmails(req.body);
+    const includeMailingList = req.body?.includeMailingList !== false;
+    const extraRecipients = parseExtraRecipients(req.body);
     const subscribers = await Mailing.find().sort({ createdAt: -1 });
-    const recipients = buildRecipientList(subscribers, extraEmails);
+    const recipients = buildRecipientList(subscribers, extraRecipients, includeMailingList);
 
     if (recipients.length === 0) {
       return res.status(400).json({
-        error: "Add subscribers to the list or enter at least one additional email.",
+        error: "Select the mailing list and/or add at least one other recipient.",
       });
     }
 
@@ -150,7 +174,10 @@ router.post("/send", async (req, res) => {
       await sleep(SEND_DELAY_MS);
     }
 
-    const listCount = recipients.filter((r) => r.name).length;
+    const subscriberEmails = new Set(
+      subscribers.map((s) => normalizeEmail(s.email)).filter((e) => EMAIL_RE.test(e)),
+    );
+    const listCount = recipients.filter((r) => subscriberEmails.has(r.email)).length;
     const extraCount = recipients.length - listCount;
 
     res.json({
@@ -163,7 +190,7 @@ router.post("/send", async (req, res) => {
       failures: failures.slice(0, 20),
       message:
         failures.length === 0
-          ? `Sent to ${sent} recipient${sent === 1 ? "" : "s"}${extraCount > 0 ? ` (${listCount} on list, ${extraCount} additional)` : ""}.`
+          ? `Sent to ${sent} recipient${sent === 1 ? "" : "s"}${extraCount > 0 ? ` (${listCount} on list, ${extraCount} other)` : ""}.`
           : `Sent to ${sent} of ${recipients.length}. ${failures.length} failed.`,
     });
   } catch (err) {
