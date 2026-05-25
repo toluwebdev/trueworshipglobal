@@ -73,7 +73,7 @@ export default function Mailing() {
       <SendEmailModal
         open={sendOpen}
         onClose={() => setSendOpen(false)}
-        subscriberCount={subscribers.length}
+        subscriberEmails={subscribers.map((entry) => entry.email)}
         mailConfigured={mailConfigured}
       />
     </div>

@@ -10,9 +10,48 @@ const router = Router();
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SEND_DELAY_MS = 250;
+const MAX_EXTRA_EMAILS = 50;
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function parseExtraEmails(body) {
+  const raw = body?.extraEmails;
+  const list = Array.isArray(raw)
+    ? raw
+    : typeof raw === "string"
+      ? raw.split(/[\s,;]+/)
+      : [];
+  return [
+    ...new Set(
+      list
+        .map((entry) => String(entry).trim().toLowerCase())
+        .filter((entry) => EMAIL_RE.test(entry)),
+    ),
+  ].slice(0, MAX_EXTRA_EMAILS);
+}
+
+function buildRecipientList(subscribers, extraEmails) {
+  const recipients = [];
+  const seen = new Set();
+
+  for (const subscriber of subscribers) {
+    const email = String(subscriber.email ?? "")
+      .trim()
+      .toLowerCase();
+    if (!EMAIL_RE.test(email) || seen.has(email)) continue;
+    seen.add(email);
+    recipients.push({ email, name: subscriber.name });
+  }
+
+  for (const email of extraEmails) {
+    if (seen.has(email)) continue;
+    seen.add(email);
+    recipients.push({ email, name: undefined });
+  }
+
+  return recipients;
 }
 
 router.get("/", async (_req, res) => {
@@ -78,44 +117,54 @@ router.post("/send", async (req, res) => {
       });
     }
 
+    const extraEmails = parseExtraEmails(req.body);
     const subscribers = await Mailing.find().sort({ createdAt: -1 });
-    if (subscribers.length === 0) {
-      return res.status(400).json({ error: "No subscribers on the mailing list." });
+    const recipients = buildRecipientList(subscribers, extraEmails);
+
+    if (recipients.length === 0) {
+      return res.status(400).json({
+        error: "Add subscribers to the list or enter at least one additional email.",
+      });
     }
 
     let sent = 0;
     const failures = [];
 
-    for (const subscriber of subscribers) {
+    for (const recipient of recipients) {
       try {
         await sendNewsletterEmail({
-          to: subscriber.email,
+          to: recipient.email,
           subject,
           message,
           siteUrl,
           images,
-          recipientName: subscriber.name,
+          recipientName: recipient.name,
         });
         sent += 1;
       } catch (err) {
         failures.push({
-          email: subscriber.email,
+          email: recipient.email,
           error: err instanceof Error ? err.message : "Send failed",
         });
       }
       await sleep(SEND_DELAY_MS);
     }
 
+    const listCount = recipients.filter((r) => r.name).length;
+    const extraCount = recipients.length - listCount;
+
     res.json({
       ok: failures.length === 0,
       sent,
       failed: failures.length,
-      total: subscribers.length,
+      total: recipients.length,
+      listCount,
+      extraCount,
       failures: failures.slice(0, 20),
       message:
         failures.length === 0
-          ? `Sent to ${sent} subscriber${sent === 1 ? "" : "s"}.`
-          : `Sent to ${sent} of ${subscribers.length}. ${failures.length} failed.`,
+          ? `Sent to ${sent} recipient${sent === 1 ? "" : "s"}${extraCount > 0 ? ` (${listCount} on list, ${extraCount} additional)` : ""}.`
+          : `Sent to ${sent} of ${recipients.length}. ${failures.length} failed.`,
     });
   } catch (err) {
     console.error("[mailing/send]", err);

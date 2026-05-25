@@ -1,11 +1,30 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { api } from "../api/client";
 import { Button, ErrorMessage, Input, Textarea } from "./ui";
 
-export default function SendEmailModal({ open, onClose, subscriberCount, mailConfigured }) {
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function parseExtraEmailsInput(input) {
+  return [
+    ...new Set(
+      String(input)
+        .split(/[\s,;]+/)
+        .map((entry) => entry.trim().toLowerCase())
+        .filter((entry) => EMAIL_RE.test(entry)),
+    ),
+  ];
+}
+
+export default function SendEmailModal({
+  open,
+  onClose,
+  subscriberEmails = [],
+  mailConfigured,
+}) {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [testEmail, setTestEmail] = useState("");
+  const [extraEmailsInput, setExtraEmailsInput] = useState("");
   const [images, setImages] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [sending, setSending] = useState(false);
@@ -19,6 +38,7 @@ export default function SendEmailModal({ open, onClose, subscriberCount, mailCon
     setSubject("");
     setMessage("");
     setTestEmail("");
+    setExtraEmailsInput("");
     setImages([]);
     setError("");
     setSendResult(null);
@@ -55,6 +75,26 @@ export default function SendEmailModal({ open, onClose, subscriberCount, mailCon
     setImages((prev) => prev.filter((item) => item !== url));
   };
 
+  const listEmails = useMemo(
+    () =>
+      [
+        ...new Set(
+          subscriberEmails
+            .map((entry) => String(entry).trim().toLowerCase())
+            .filter((entry) => EMAIL_RE.test(entry)),
+        ),
+      ],
+    [subscriberEmails],
+  );
+
+  const extraEmails = useMemo(() => {
+    const parsed = parseExtraEmailsInput(extraEmailsInput);
+    const listSet = new Set(listEmails);
+    return parsed.filter((email) => !listSet.has(email));
+  }, [extraEmailsInput, listEmails]);
+
+  const recipientCount = listEmails.length + extraEmails.length;
+
   const onSend = async (options = {}) => {
     const isTest = Boolean(options.test);
     if (!subject.trim()) {
@@ -69,8 +109,21 @@ export default function SendEmailModal({ open, onClose, subscriberCount, mailCon
       setError("Enter an email for the test send.");
       return;
     }
-    if (!isTest && !confirm(`Send this email to ${subscriberCount} subscriber(s)?`)) {
+    if (!isTest && recipientCount === 0) {
+      setError("Add subscribers to the list or enter at least one additional email.");
       return;
+    }
+    if (!isTest) {
+      const parts = [];
+      if (listEmails.length > 0) {
+        parts.push(`${listEmails.length} on the mailing list`);
+      }
+      if (extraEmails.length > 0) {
+        parts.push(`${extraEmails.length} additional`);
+      }
+      if (!confirm(`Send this email to ${parts.join(" + ")} (${recipientCount} total)?`)) {
+        return;
+      }
     }
 
     setSending(true);
@@ -82,6 +135,7 @@ export default function SendEmailModal({ open, onClose, subscriberCount, mailCon
         message: message.trim(),
         images,
         testEmail: isTest ? testEmail.trim() : undefined,
+        extraEmails: isTest ? undefined : extraEmails,
       });
       setSendResult(result);
       if (!isTest && result.failed === 0) {
@@ -181,6 +235,21 @@ export default function SendEmailModal({ open, onClose, subscriberCount, mailCon
             )}
           </div>
 
+          <Textarea
+            label="Additional recipients (optional)"
+            value={extraEmailsInput}
+            onChange={(e) => setExtraEmailsInput(e.target.value)}
+            rows={3}
+            disabled={sending || uploading}
+            placeholder="People not on the list — one email per line, or separated by commas"
+          />
+          {extraEmails.length > 0 && (
+            <p className="-mt-2 text-xs text-white/50">
+              {extraEmails.length} additional address{extraEmails.length === 1 ? "" : "es"} will
+              receive this send.
+            </p>
+          )}
+
           <Input
             label="Test email"
             type="email"
@@ -201,10 +270,10 @@ export default function SendEmailModal({ open, onClose, subscriberCount, mailCon
           </Button>
           <Button
             type="button"
-            disabled={sending || uploading || mailConfigured === false || subscriberCount === 0}
+            disabled={sending || uploading || mailConfigured === false || recipientCount === 0}
             onClick={() => onSend({ test: false })}
           >
-            Send to all ({subscriberCount})
+            Send to all ({recipientCount})
           </Button>
           <Button type="button" variant="ghost" onClick={resetAndClose} disabled={sending}>
             Cancel
