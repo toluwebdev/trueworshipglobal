@@ -61,7 +61,14 @@ router.post("/send", async (req, res) => {
       if (!EMAIL_RE.test(testEmail)) {
         return res.status(400).json({ error: "Invalid test email address." });
       }
-      await sendNewsletterEmail({ to: testEmail, subject, message, siteUrl, images });
+      await sendNewsletterEmail({
+        to: testEmail,
+        subject,
+        message,
+        siteUrl,
+        images,
+        recipientName: String(req.body?.testName ?? "").trim() || undefined,
+      });
       return res.json({
         ok: true,
         test: true,
@@ -87,6 +94,7 @@ router.post("/send", async (req, res) => {
           message,
           siteUrl,
           images,
+          recipientName: subscriber.name,
         });
         sent += 1;
       } catch (err) {

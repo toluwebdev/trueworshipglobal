@@ -140,7 +140,7 @@ export default function SendEmailModal({ open, onClose, subscriberCount, mailCon
             onChange={(e) => setMessage(e.target.value)}
             rows={8}
             disabled={sending || uploading}
-            placeholder="Write your message…"
+            placeholder="Write like a personal note (e.g. “Hi, we wanted to share…”). Avoid words like “sale” or “offer”."
           />
 
           <div>
