@@ -70,12 +70,14 @@ export default function Mailing() {
         )}
       </div>
 
-      <SendEmailModal
-        open={sendOpen}
-        onClose={() => setSendOpen(false)}
-        subscriberEmails={subscribers.map((entry) => entry.email)}
-        mailConfigured={mailConfigured}
-      />
+      {sendOpen && (
+        <SendEmailModal
+          open={sendOpen}
+          onClose={() => setSendOpen(false)}
+          subscriberEmails={subscribers.map((entry) => entry.email)}
+          mailConfigured={mailConfigured}
+        />
+      )}
     </div>
   );
 }

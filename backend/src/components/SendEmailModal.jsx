@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { api } from "../api/client";
 import { Button, ErrorMessage, Input, Textarea } from "./ui";
 
@@ -63,6 +64,23 @@ export default function SendEmailModal({
     resetForm();
     onClose();
   };
+
+  useEffect(() => {
+    if (!open) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open, onClose]);
 
   const onPickImages = async (e) => {
     const files = Array.from(e.target.files ?? []);
@@ -173,17 +191,17 @@ export default function SendEmailModal({
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="send-email-title"
-      onClick={resetAndClose}
+      onMouseDown={resetAndClose}
     >
       <div
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded border border-white/15 bg-neutral-950 p-6 shadow-xl"
-        onClick={(e) => e.stopPropagation()}
+        className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg border-2 border-white/25 bg-neutral-800 p-6 shadow-2xl"
+        onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="mb-6 flex items-start justify-between gap-4">
           <h3 id="send-email-title" className="text-lg font-semibold tracking-wide text-white">
@@ -392,6 +410,7 @@ export default function SendEmailModal({
         )}
         <ErrorMessage message={error} />
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
