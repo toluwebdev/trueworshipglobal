@@ -81,10 +81,18 @@ export default function Mailing() {
           </p>
         )}
         {mailConfigured === true && (
-          <p className="mt-3 text-sm text-white/60">
-            Emails are sent from your Hostinger mailbox. Send a test first, then send to everyone
-            on the list.
-          </p>
+          <div className="mt-3 space-y-2 text-sm text-white/60">
+            <p>
+              Emails are sent from your Hostinger mailbox. Send a test first, then send to everyone
+              on the list.
+            </p>
+            <p className="text-white/45">
+              To reduce spam folder placement: in Hostinger enable SPF + DKIM for your domain, set{" "}
+              <code className="text-white/70">SMTP_FROM</code> to the same address as{" "}
+              <code className="text-white/70">SMTP_USER</code>, and add{" "}
+              <code className="text-white/70">PUBLIC_API_URL</code> (your server URL) on Vercel.
+            </p>
+          </div>
         )}
 
         <div className="mt-6 space-y-4">

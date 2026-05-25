@@ -9,6 +9,7 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import Home from "./pages/Home";
 import Donate from "./pages/Donate";
+import Unsubscribe from "./pages/Unsubscribe";
 import WorshipSchool from "./pages/WorshipSchool";
 import WorshipSchoolDetail from "./pages/WorshipSchoolDetail";
 import Nav from "./components/Nav";
@@ -122,6 +123,7 @@ const App = () => {
                 </AnimatedPage>
               }
             />
+            <Route path="/unsubscribe" element={<Unsubscribe />} />
           </Routes>
         </AnimatePresence>
       </main>

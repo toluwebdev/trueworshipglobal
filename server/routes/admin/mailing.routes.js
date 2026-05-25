@@ -1,6 +1,10 @@
 import { Router } from "express";
 import Mailing from "../../schema/mailingSchema.js";
-import { isMailConfigured, sendNewsletterEmail } from "../../utils/mail.js";
+import {
+  getSiteUrl,
+  isMailConfigured,
+  sendNewsletterEmail,
+} from "../../utils/mail.js";
 
 const router = Router();
 
@@ -43,7 +47,7 @@ router.post("/send", async (req, res) => {
       return res.status(400).json({ error: "Message is required (max 20,000 characters)." });
     }
 
-    const siteUrl = (process.env.SITE_URL || process.env.FRONTEND_URL || "").replace(/\/$/, "");
+    const siteUrl = getSiteUrl();
 
     if (testEmail) {
       if (!EMAIL_RE.test(testEmail)) {
